@@ -1,5 +1,16 @@
 const socket = io();
+const params = new URLSearchParams(window.location.search);
 
+const roomParam = params.get("room");
+const userParam = params.get("username");
+
+if (roomParam) {
+    document.getElementById("room").value = roomParam;
+}
+
+if (userParam) {
+    document.getElementById("username").value = userParam;
+}
 const status = document.getElementById("status");
 const members = document.getElementById("members");
 
