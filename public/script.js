@@ -18,15 +18,16 @@ const remoteAudio = document.getElementById("remoteAudio");
 
 const config = {
     iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
+        {
+            urls: "stun:stun.l.google.com:19302"
+        },
 
         {
-            urls: "turn:openrelay.metered.ca:80",
-            username: "openrelayproject",
-            credential: "openrelayproject"
-        },
-        {
-            urls: "turn:openrelay.metered.ca:443",
+            urls: [
+                "turn:openrelay.metered.ca:80?transport=tcp",
+                "turn:openrelay.metered.ca:443?transport=tcp",
+                "turns:openrelay.metered.ca:443?transport=tcp"
+            ],
             username: "openrelayproject",
             credential: "openrelayproject"
         }
@@ -106,8 +107,10 @@ function createPeer() {
 
     if (peer) return; // Không tạo peer lần thứ hai
 
-    peer = new RTCPeerConnection(config);
-
+    peer = new RTCPeerConnection({
+    ...config,
+    iceCandidatePoolSize: 10
+});
     // Gửi micro của mình
     localStream.getTracks().forEach(track => {
         peer.addTrack(track, localStream);
@@ -142,10 +145,15 @@ function createPeer() {
     };
 
     // Theo dõi trạng thái kết nối
-    peer.onconnectionstatechange = () => {
-        console.log("Connection:", peer.connectionState);
-        status.innerHTML = "📶 " + peer.connectionState;
-    };
+peer.onconnectionstatechange = () => {
+    console.log("Connection:", peer.connectionState);
+    status.innerHTML = "📶 " + peer.connectionState;
+};
+
+peer.oniceconnectionstatechange = () => {
+    console.log("ICE:", peer.iceConnectionState);
+    status.innerHTML = "ICE: " + peer.iceConnectionState;
+};
 }
 socket.on("offer", async offer => {
 
