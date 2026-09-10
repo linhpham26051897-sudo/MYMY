@@ -13,7 +13,7 @@ let room = "";
 let username = "";
 let peer;
 let localStream;
-
+let pendingCandidates = [];
 const remoteAudio = document.getElementById("remoteAudio");
 
 const config = {
@@ -104,6 +104,8 @@ socket.on("room-users", users => {
 });
 function createPeer() {
 
+    if (peer) return; // Không tạo peer lần thứ hai
+
     peer = new RTCPeerConnection(config);
 
     // Gửi micro của mình
@@ -152,6 +154,9 @@ socket.on("offer", async offer => {
     createPeer();
 
     await peer.setRemoteDescription(offer);
+    while (pendingCandidates.length) {
+    await peer.addIceCandidate(pendingCandidates.shift());
+}
 
     const answer = await peer.createAnswer();
 
@@ -167,14 +172,21 @@ socket.on("offer", async offer => {
 socket.on("answer", async answer => {
 
     await peer.setRemoteDescription(answer);
+    while (pendingCandidates.length) {
+    await peer.addIceCandidate(pendingCandidates.shift());
+}
 
     status.innerHTML = "✅ Cuộc gọi đã kết nối";
 
 });
 socket.on("candidate", async candidate => {
 
-    if (peer) {
+    if (!peer) return;
+
+    if (peer.remoteDescription) {
         await peer.addIceCandidate(candidate);
+    } else {
+        pendingCandidates.push(candidate);
     }
 
 });
