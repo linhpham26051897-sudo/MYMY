@@ -1,156 +1,93 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
-    <title>MYMY</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYMY - Trang chủ</title>
+
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      💜 MYMY
+    </div>
+
+    <div class="profile-card">
+
+      <div class="avatar" id="avatarLetter">
+        N
+      </div>
+
+      <h3 id="fullName">
+        Nguyen Van Linh
+      </h3>
+
+      <p id="emailUser">
+        linh@gmail.com
+      </p>
+
+      <span class="status">
+        🟢 Đang hoạt động
+      </span>
+
+    </div>
+
+    <button id="logoutBtn" class="logout">
+      🚪 Đăng xuất
+    </button>
+
+    <div class="online-box">
+
+      <h4>👥 Thành viên Online</h4>
+
+      <div id="memberList">
+
+        <div class="member">
+          <span class="dot"></span>
+          Bạn
+        </div>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
 
     <div class="header">
-        <div class="menu-tabs">
 
-    <button id="openChat" class="tab active">
-         Chat
-    </button>
+      <input
+        id="searchRoom"
+        placeholder="🔍 Tìm cuộc trò chuyện..."
+      >
 
-    <button id="openCall" class="tab">
-         Gọi điện
-    </button>
-
-</div>
-<div class="home-page">
-
-    <!-- Thanh tìm kiếm -->
-    <div class="search-box">
-        <input id="searchRoom" placeholder="🔍 Tìm phòng hoặc bạn bè...">
-    </div>
-
-    <!-- Danh sách phòng -->
-    <div class="chat-list" id="chatList">
-
-        <div class="chat-item">
-            <div class="chat-avatar">💜</div>
-
-            <div class="chat-info">
-                <h3>Phòng Gia Đình</h3>
-                <p>Nhấn để trò chuyện</p>
-            </div>
-
-            <button class="enter-chat" data-room="family">
-                💬
-            </button>
-        </div>
-
-        <div class="chat-item">
-            <div class="chat-avatar">🎮</div>
-
-            <div class="chat-info">
-                <h3>Nhóm Game</h3>
-                <p> thành viên online</p>
-            </div>
-
-            <button class="enter-chat" data-room="game">
-                💬
-            </button>
-        </div>
+      <button id="createRoomBtn">
+        ➕ Phòng mới
+      </button>
 
     </div>
 
-    <!-- Tạo phòng -->
-    <button id="createRoomBtn" class="create-room">
-        ➕ Tạo phòng mới
-    </button>
+    <h2 class="title">
+      Cuộc trò chuyện
+    </h2>
 
-</div>
+    <div id="chatList" class="room-list"></div>
 
-        <div class="profile">
+  </main>
 
-            <div class="avatar">
-                
-            </div>
-            <button id="logoutBtn">
-     Đăng xuất
-</button>
-
-            <div class="user-info">
-                <h2>MYMY</h2>
-                <p id="onlineStatus">🟢 Online</p>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="main-layout">
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-
-        <h3>👥 Thành viên</h3>
-
-        <div id="onlineList">
-
-            <div class="userCard">
-                🟢 Bạn
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- PHẦN CHÍNH -->
-    <div class="content">
-
-        <div class="call-card">
-
-    <div class="call-avatar">
-        💜
-    </div>
-    <div class="chat-card">
-
-    <h3>💬 Tin nhắn phòng</h3>
-
-    <div id="messages" class="messages"></div>
-
-    <div class="send-bar">
-
-        <input
-            id="messageInput"
-            placeholder="Nhập tin nhắn..."
-        >
-
-        <button id="sendBtn">➤</button>
-
-    </div>
-
-</div>
-
-    <h2 id="callName">MYMY ROOM</h2>
-
-    <p id="status">📡 Chưa kết nối.</p>
-
-    <div class="call-time">
-        ⏱️ 00:00
-    </div>
-
-    <p id="members">
-        👥 0 người trong phòng
-    </p>
-
-</div>
-    <audio id="remoteAudio" autoplay playsinline></audio>
-    <audio id="ringtone" loop>
-    <source src="ringtone.mp3" type="audio/mpeg">
-</audio>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="https://unpkg.com/livekit-client/dist/livekit-client.umd.js"></script>
+
 <script src="script.js"></script>
 
 </body>

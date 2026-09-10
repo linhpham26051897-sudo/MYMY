@@ -1,407 +1,186 @@
 const socket = io();
-const params = new URLSearchParams(window.location.search);
 
-const roomParam = params.get("room");
-const userParam = params.get("username");
+// ================= USER =================
 
-if (roomParam) {
-    document.getElementById("room").value = roomParam;
+const currentUser =
+JSON.parse(localStorage.getItem("currentUser"));
+
+if(!currentUser){
+
+    window.location.href="login.html";
+
 }
 
-if (userParam) {
-    document.getElementById("username").value = userParam;
-}
-const status = document.getElementById("status");
-const members = document.getElementById("members");
+document.getElementById("fullName").innerHTML =
+currentUser.fullname;
 
-let username = "";
-let room = "";
+document.getElementById("emailUser").innerHTML =
+currentUser.email;
 
-let roomConnection = null;
-let micEnabled = true;
-let callSeconds = 0;
-let timer = null;
-/* ====================== VÀO PHÒNG ====================== */
+document.getElementById("avatarLetter").innerHTML =
+currentUser.fullname.charAt(0).toUpperCase();
 
-document.getElementById("join").onclick = async () => {
+// ================= PHÒNG CHAT =================
 
-    username = document.getElementById("username").value.trim();
-    room = document.getElementById("room").value.trim();
-
-    if (!username || !room) {
-        alert("Nhập tên và mã phòng!");
-        return;
+const rooms = [
+    {
+        name:"Gia Đình",
+        icon:"💜",
+        last:"Tối nay gọi nhé!"
+    },
+    {
+        name:"Lớp CNTT",
+        icon:"💻",
+        last:"Có bài tập mới."
+    },
+    {
+        name:"Nhóm Game",
+        icon:"🎮",
+        last:"8 giờ tối chơi."
     }
+];
 
-    try {
+const chatList =
+document.getElementById("chatList");
 
-        await navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: false,
-        });
+function renderRooms(){
 
-        socket.emit("join-room", {
-            room,
-            username,
-        });
+    chatList.innerHTML="";
 
-        status.innerHTML = "🟢 Đã vào phòng " + room;
+    rooms.forEach(room=>{
 
-    } catch (err) {
+        chatList.innerHTML += `
+        <div class="room-card">
 
-        alert("Bạn chưa cấp quyền Micro.");
+            <div class="room-left">
 
-    }
+                <div class="room-avatar">
+                    ${room.icon}
+                </div>
 
-};
+                <div class="room-info">
 
-/* ====================== GỌI ====================== */
+                    <h3>${room.name}</h3>
 
-document.getElementById("call").onclick = async () => {
+                    <p>${room.last}</p>
 
-    if (!room) {
-        alert("Hãy vào phòng trước.");
-        return;
-    }
+                </div>
 
-    if (roomConnection) {
-        alert("Đã trong cuộc gọi.");
-        return;
-    }
-
-    status.innerHTML = "📞 Đang kết nối...";
-
-    try {
-
-        const res = await fetch(
-            `/token?room=${room}&username=${username}`
-        );
-
-        const data = await res.json();
-
-        roomConnection = new LivekitClient.Room();
-
-        /* Nhận âm thanh */
-
-        roomConnection.on(
-            LivekitClient.RoomEvent.TrackSubscribed,
-            (track) => {
-
-                if (track.kind === "audio") {
-
-                    const audio = track.attach();
-
-                    audio.autoplay = true;
-                    audio.playsInline = true;
-
-                    document.body.appendChild(audio);
-
-                }
-
-            }
-        );
-
-        roomConnection.on(
-            LivekitClient.RoomEvent.Disconnected,
-            () => {
-                status.innerHTML = "📴 Đã ngắt kết nối";
-                roomConnection = null;
-            }
-        );
-
-        await roomConnection.connect(
-            data.url,
-            data.token
-        );
-
-        /* QUAN TRỌNG */
-        await roomConnection.startAudio();
-
-        await roomConnection.localParticipant.setMicrophoneEnabled(true);
-
-        status.innerHTML = "✅ Đã kết nối cuộc gọi";
-        startTimer();
-
-document.getElementById("callName").innerHTML =
-    "📞 Đang gọi cùng " + username;
-
-document.querySelector(".call-avatar").innerHTML = "🎙️";
-
-document.querySelector(".call-avatar").classList.add("calling");
-
-    } catch (err) {
-
-        console.error(err);
-
-        status.innerHTML = "❌ Không kết nối được cuộc gọi";
-
-    }
-
-};
-
-/* ====================== TẮT MIC ====================== */
-
-document.getElementById("mute").onclick = async () => {
-
-    if (!roomConnection) return;
-
-    micEnabled = !micEnabled;
-
-    await roomConnection.localParticipant.setMicrophoneEnabled(
-        micEnabled
-    );
-
-    status.innerHTML = micEnabled
-        ? "🎤 Micro đã bật"
-        : "🔇 Micro đã tắt";
-
-};
-
-/* ====================== CÚP MÁY ====================== */
-
-document.getElementById("hangup").onclick = async () => {
-
-    if (!roomConnection) return;
-
-    await roomConnection.disconnect();
-
-    roomConnection = null;
-
-    status.innerHTML = "📴 Đã cúp máy";
-    stopTimer();
-
-document.getElementById("callName").innerHTML =
-    "MYMY ROOM";
-
-document.querySelector(".call-avatar").innerHTML = "💜";
-
-document.querySelector(".call-avatar").classList.remove("calling");
-
-};
-
-/* ====================== SOCKET PHÒNG ====================== */
-
-socket.on("user-joined", (user) => {
-    status.innerHTML = "🟢 " + user + " vừa vào phòng";
-});
-
-socket.on("user-left", (user) => {
-    status.innerHTML = "🔴 " + user + " rời phòng";
-});
-
-socket.on("room-users", (users) => {
-
-    // Cập nhật số người
-    members.innerHTML = `👥 ${users.length} người trong phòng`;
-
-    // Lấy khung danh sách thành viên
-    const onlineList = document.getElementById("onlineList");
-
-    // Xóa danh sách cũ
-    onlineList.innerHTML = "";
-
-    // Thêm từng thành viên
-    users.forEach((user) => {
-
-        const card = document.createElement("div");
-        card.className = "userCard";
-
-        // Avatar là chữ cái đầu
-        const avatar = user.charAt(0).toUpperCase();
-
-        card.innerHTML = `
-            <div class="user-avatar">${avatar}</div>
-
-            <div class="user-name">
-                <span class="dot"></span>
-                ${user}
             </div>
+
+            <div class="actions">
+
+                <button class="chat-btn"
+                onclick="openChat('${room.name}')">
+                    💬
+                </button>
+
+                <button class="call-btn"
+                onclick="openCall('${room.name}')">
+                    📞
+                </button>
+
+            </div>
+
+        </div>
         `;
 
-        onlineList.appendChild(card);
+    });
+
+}
+
+renderRooms();
+
+// ================= TÌM PHÒNG =================
+
+document.getElementById("searchRoom")
+.addEventListener("input",(e)=>{
+
+    const keyword =
+    e.target.value.toLowerCase();
+
+    const cards =
+    document.querySelectorAll(".room-card");
+
+    cards.forEach(card=>{
+
+        const text =
+        card.innerText.toLowerCase();
+
+        card.style.display =
+        text.includes(keyword)
+        ? "flex"
+        : "none";
+
     });
 
 });
-function startTimer(){
 
-    clearInterval(timer);
+// ================= TẠO PHÒNG =================
 
-    callSeconds = 0;
+document.getElementById("createRoomBtn").onclick=()=>{
 
-    timer = setInterval(()=>{
-
-        callSeconds++;
-
-        const min = String(Math.floor(callSeconds/60)).padStart(2,"0");
-        const sec = String(callSeconds%60).padStart(2,"0");
-
-        document.querySelector(".call-time").innerHTML =
-            "⏱️ " + min + ":" + sec;
-
-    },1000);
-
-}
-
-function stopTimer(){
-
-    clearInterval(timer);
-
-    document.querySelector(".call-time").innerHTML =
-        "⏱️ 00:00";
-
-}
-/* ================= CHAT ================= */
-
-const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const messages = document.getElementById("messages");
-
-function addMessage(data, mine){
-
-    const div = document.createElement("div");
-
-    div.className = mine
-        ? "message mine"
-        : "message other";
-
-    div.innerHTML = `
-        <div class="sender">
-            ${data.username} • ${data.time}
-        </div>
-
-        <div>${data.message}</div>
-    `;
-
-    messages.appendChild(div);
-
-    messages.scrollTop = messages.scrollHeight;
-
-}
-
-sendBtn.onclick = () => {
-
-    const text = messageInput.value.trim();
-
-    if(text === "") return;
-
-    socket.emit("send-message",{
-        room,
-        username,
-        message:text,
-    });
-
-    messageInput.value = "";
-
-};
-
-messageInput.addEventListener("keydown",(e)=>{
-
-    if(e.key === "Enter"){
-        sendBtn.click();
-    }
-
-});
-
-socket.on("new-message",(data)=>{
-
-    addMessage(
-        data,
-        data.username === username
-    );
-
-});
-// ===== MỞ TRANG CHAT =====
-document.getElementById("openChat").onclick = () => {
-
-    const roomCode = document.getElementById("room").value.trim();
-    const user = document.getElementById("username").value.trim();
-
-    if (!roomCode || !user) {
-        alert("Vào phòng trước.");
-        return;
-    }
-
-    window.location.href =
-        `chat.html?room=${roomCode}&username=${user}`;
-
-};
-
-// ===== MỞ TRANG GỌI =====
-document.getElementById("openCall").onclick = () => {
-
-    const roomCode = document.getElementById("room").value.trim();
-    const user = document.getElementById("username").value.trim();
-
-    if (!roomCode || !user) {
-        alert("Vào phòng trước.");
-        return;
-    }
-
-    window.location.href =
-        `call.html?room=${roomCode}&username=${user}`;
-
-};
-/* ================= TRANG CHỦ ================= */
-
-// Lấy user đã đăng nhập
-const currentUser =
-    JSON.parse(localStorage.getItem("currentUser"));
-
-if(currentUser){
-
-    document.querySelector(".user-info h2").innerHTML =
-        currentUser.fullname;
-
-}
-
-// Chuyển sang trang Chat
-document.querySelectorAll(".enter-chat").forEach(btn=>{
-
-    btn.onclick = ()=>{
-
-        const room = btn.dataset.room;
-
-        window.location.href =
-            `chat.html?room=${room}&username=${currentUser.username}`;
-
-    };
-
-});
-
-// Tạo phòng mới
-document.getElementById("createRoomBtn").onclick = ()=>{
-
-    const room = prompt("Nhập tên phòng mới:");
+    const room =
+    prompt("Tên phòng mới:");
 
     if(!room) return;
 
-    const list =
-        document.getElementById("chatList");
+    rooms.unshift({
+        name:room,
+        icon:"✨",
+        last:"Phòng mới tạo."
+    });
 
-    list.innerHTML += `
-        <div class="chat-item">
-
-            <div class="chat-avatar">💬</div>
-
-            <div class="chat-info">
-                <h3>${room}</h3>
-                <p>Phòng mới tạo</p>
-            </div>
-
-            <button class="enter-chat" data-room="${room}">
-                💬
-            </button>
-
-        </div>
-    `;
-
-    location.reload();
+    renderRooms();
 
 };
-document.getElementById("logoutBtn").onclick = ()=>{
+
+// ================= CHAT =================
+
+window.openChat=(room)=>{
+
+    window.location.href=
+    `chat.html?room=${encodeURIComponent(room)}&username=${currentUser.username}`;
+
+};
+
+// ================= GỌI =================
+
+window.openCall=(room)=>{
+
+    window.location.href=
+    `call.html?room=${encodeURIComponent(room)}&username=${currentUser.username}`;
+
+};
+
+// ================= LOGOUT =================
+
+document.getElementById("logoutBtn").onclick=()=>{
 
     localStorage.removeItem("currentUser");
 
     window.location.href="login.html";
 
 };
+
+// ================= ONLINE =================
+
+socket.on("room-users",(users)=>{
+
+    const member =
+    document.getElementById("memberList");
+
+    member.innerHTML="";
+
+    users.forEach(user=>{
+
+        member.innerHTML += `
+        <div class="member">
+            <span class="dot"></span>
+            ${user}
+        </div>
+        `;
+
+    });
+
+});

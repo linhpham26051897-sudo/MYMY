@@ -2,7 +2,8 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const { AccessToken } = require("livekit-server-sdk");
-
+const LIVEKIT_API_KEY = process.env.APIj9JDN9zXWvbf;
+const LIVEKIT_API_SECRET = process.env.cAhenO9QOp2ucmciJPsfMjKJgdVeasxZcUlPDMaEsA9A;
 const app = express();
 const server = http.createServer(app);
 
@@ -44,11 +45,48 @@ io.on("connection", (socket) => {
 
     console.log(`${username} vào phòng ${room}`);
   });
-  socket.on("send-message",(data)=>{
+  socket.on("leave-room", ({ room, username }) => {
+    socket.leave(room);
 
-    io.to(data.room).emit("new-message",{
-        username:data.username,
-        message:data.message
+    io.to(room).emit("user-left", username);
+});
+  socket.on("send-message", ({ room, username, message }) => {
+
+    io.to(room).emit("new-message", {
+        username,
+        message,
+        time: new Date().toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit"
+        })
+    });
+
+});
+// ================= GỌI ĐIỆN =================
+
+socket.on("call-user", ({ room, username }) => {
+
+    socket.to(room).emit("incoming-call", {
+        room,
+        username
+    });
+
+});
+
+// Người nhận đồng ý
+socket.on("accept-call", ({ room, username }) => {
+
+    io.to(room).emit("call-accepted", {
+        username
+    });
+
+});
+
+// Người nhận từ chối
+socket.on("reject-call", ({ room, username }) => {
+
+    socket.to(room).emit("call-rejected", {
+        username
     });
 
 });
@@ -88,42 +126,36 @@ io.on("connection", (socket) => {
 /* ================== LIVEKIT TOKEN ================== */
 
 app.get("/token", async (req, res) => {
-  try {
+
     const room = req.query.room;
     const username = req.query.username;
 
     if (!room || !username) {
-      return res.status(400).json({
-        error: "Thiếu room hoặc username",
-      });
+        return res.status(400).send("Thiếu room hoặc username");
     }
 
     const token = new AccessToken(
-      process.env.LIVEKIT_API_KEY,
-      process.env.LIVEKIT_API_SECRET,
-      {
-        identity: username,
-      }
+        LIVEKIT_API_KEY,
+        LIVEKIT_API_SECRET,
+        {
+            identity: username
+        }
     );
 
     token.addGrant({
-      roomJoin: true,
-      room,
-      canPublish: true,
-      canSubscribe: true,
+        roomJoin: true,
+        room: room,
+        canPublish: true,
+        canSubscribe: true
     });
+
+    const jwt = await token.toJwt();
 
     res.json({
-      token: await token.toJwt(),
-      url: process.env.LIVEKIT_URL,
+        token: jwt
     });
-  } catch (err) {
-    console.error(err);
 
-    res.status(500).json({
-      error: "Không tạo được token",
-    });
-  }
+
 });
 
 /* ================== START ================== */

@@ -2,14 +2,23 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MYMY - Đăng nhập</title>
 
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
     <link rel="stylesheet" href="auth.css">
 </head>
-
 <body>
 
-<div class="auth-card">
+<div class="background-circle circle1"></div>
+<div class="background-circle circle2"></div>
+
+<div class="auth-container">
 
     <div class="logo">
         💜
@@ -17,37 +26,59 @@
 
     <h1>MYMY</h1>
 
-    <p>Đăng nhập để tiếp tục</p>
+    <p class="subtitle">
+        Chào mừng quay trở lại
+    </p>
 
-    <input
-        id="email"
-        type="email"
-        placeholder="Email"
-    >
+    <div class="input-group">
 
-    <input
-        id="password"
-        type="password"
-        placeholder="Mật khẩu"
-    >
+        <label>Email</label>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="example@gmail.com"
+        >
+
+    </div>
+
+    <div class="input-group">
+
+        <label>Mật khẩu</label>
+
+        <input
+            id="password"
+            type="password"
+            placeholder="********"
+        >
+
+    </div>
 
     <button id="loginBtn">
         Đăng nhập
     </button>
 
-    <div class="bottom-text">
+    <div class="divider">
+        hoặc
+    </div>
+
+    <button class="google-btn">
+        🌐 Đăng nhập với Google
+    </button>
+
+    <p class="bottom-text">
 
         Chưa có tài khoản?
 
         <a href="register.html">
-            Đăng ký
+            Đăng ký ngay
         </a>
 
-    </div>
+    </p>
 
 </div>
 
-<script src="login.js"></script>
+<script src="auth.js"></script>
 
 </body>
 </html>

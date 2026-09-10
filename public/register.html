@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MYMY - Đăng ký</title>
 
     <link rel="stylesheet" href="auth.css">
@@ -9,41 +10,56 @@
 
 <body>
 
-<div class="auth-card">
+<div class="background-circle circle1"></div>
+<div class="background-circle circle2"></div>
 
-    <div class="logo">
-        💜
-    </div>
+<div class="auth-container">
+
+    <div class="logo">💜</div>
 
     <h1>Tạo tài khoản MYMY</h1>
 
-    <p>Đăng ký để bắt đầu trò chuyện</p>
+    <p class="subtitle">
+        Tham gia cộng đồng MYMY
+    </p>
 
-    <input id="fullname" placeholder="Họ và tên">
+    <div class="input-group">
+        <label>Họ và tên</label>
+        <input id="fullname" placeholder="Nguyễn Văn A">
+    </div>
 
-    <input id="username" placeholder="Tên người dùng">
+    <div class="input-group">
+        <label>Tên người dùng</label>
+        <input id="username" placeholder="abc123">
+    </div>
 
-    <input id="email" type="email" placeholder="Email">
+    <div class="input-group">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="example@gmail.com">
+    </div>
 
-    <input id="password" type="password" placeholder="Mật khẩu">
+    <div class="input-group">
+        <label>Mật khẩu</label>
+        <input id="password" type="password" placeholder="********">
+    </div>
 
-    <input id="confirmPassword" type="password" placeholder="Nhập lại mật khẩu">
+    <div class="input-group">
+        <label>Nhập lại mật khẩu</label>
+        <input id="confirmPassword" type="password" placeholder="********">
+    </div>
 
     <button id="registerBtn">
         Tạo tài khoản
     </button>
 
-    <div class="bottom-text">
+    <p class="bottom-text">
         Đã có tài khoản?
-
-        <a href="login.html">
-            Đăng nhập
-        </a>
-    </div>
+        <a href="login.html">Đăng nhập</a>
+    </p>
 
 </div>
 
-<script src="register.js"></script>
+<script src="auth.js"></script>
 
 </body>
 </html>

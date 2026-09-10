@@ -1,35 +1,64 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>MYMY Call</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYMY Call</title>
 
-<link rel="stylesheet" href="call.css">
+  <link rel="stylesheet" href="call.css">
 </head>
 
 <body>
 
-<div class="call-screen">
+<div class="call-page">
 
-    <div class="avatar-big">💜</div>
+  <!-- Quay lại -->
+  <button id="backBtn" class="back-btn">⬅</button>
 
-    <h1 id="callRoom">MYMY ROOM</h1>
+  <!-- Avatar -->
+  <div class="avatar-wrapper">
 
-    <p id="status">Đang kết nối...</p>
+    <div class="ring"></div>
+    <div class="ring delay"></div>
 
-    <div class="buttons">
-
-        <button id="muteBtn">🎤</button>
-
-        <button id="speakerBtn">🔊</button>
-
-        <button id="hangupBtn" class="red">📞</button>
-
+    <div class="avatar-big" id="avatarBig">
+      💜
     </div>
+
+  </div>
+
+  <!-- Tên phòng -->
+  <h1 id="roomName">Gia Đình</h1>
+
+  <p id="callStatus">
+    📡 Đang kết nối...
+  </p>
+
+  <!-- Đồng hồ -->
+  <div class="timer" id="timer">
+    00:00
+  </div>
+
+  <!-- Điều khiển -->
+  <div class="controls">
+
+    <button id="micBtn" class="control gray">🎤</button>
+
+    <button id="speakerBtn" class="control blue">🔊</button>
+
+    <button id="cameraBtn" class="control purple">📹</button>
+
+    <button id="hangupBtn" class="control red">📞</button>
+
+  </div>
 
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+
+<!-- LiveKit -->
+<script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+
 <script src="call.js"></script>
 
 </body>

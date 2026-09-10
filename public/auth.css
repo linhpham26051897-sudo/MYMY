@@ -2,8 +2,10 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Poppins,sans-serif;
+    font-family:'Poppins',sans-serif;
 }
+
+/* ===== NỀN ===== */
 
 body{
 
@@ -13,39 +15,92 @@ body{
     justify-content:center;
     align-items:center;
 
+    overflow:hidden;
+
     background:linear-gradient(
         135deg,
-        #5B21B6,
-        #7C3AED,
-        #2563EB
+        #5B21B6 0%,
+        #7C3AED 40%,
+        #2563EB 100%
     );
+
+    position:relative;
 
 }
 
-.auth-card{
+/* ===== HÌNH TRÒN TRANG TRÍ ===== */
 
-    width:370px;
+.background-circle{
 
-    padding:35px;
+    position:absolute;
+
+    border-radius:50%;
+
+    filter:blur(20px);
+
+    opacity:.35;
+
+}
+
+.circle1{
+
+    width:260px;
+    height:260px;
+
+    background:#EC4899;
+
+    top:-80px;
+    left:-80px;
+
+}
+
+.circle2{
+
+    width:320px;
+    height:320px;
+
+    background:#60A5FA;
+
+    bottom:-120px;
+    right:-100px;
+
+}
+
+/* ===== KHUNG LOGIN ===== */
+
+.auth-container{
+
+    width:390px;
+    max-width:92%;
+
+    background:rgba(255,255,255,.15);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.25);
 
     border-radius:30px;
 
-    background:rgba(255,255,255,.18);
+    padding:35px;
 
-    backdrop-filter:blur(20px);
+    box-shadow:0 20px 50px rgba(0,0,0,.25);
 
     text-align:center;
 
     color:white;
 
+    z-index:2;
+
 }
+
+/* ===== LOGO ===== */
 
 .logo{
 
     width:90px;
     height:90px;
 
-    margin:auto;
+    margin:auto auto 20px;
 
     border-radius:50%;
 
@@ -59,43 +114,83 @@ body{
     align-items:center;
     justify-content:center;
 
-    font-size:40px;
+    font-size:42px;
 
-    margin-bottom:15px;
+    box-shadow:0 0 30px rgba(236,72,153,.45);
 
 }
 
-.auth-card h1{
+.auth-container h1{
+
+    font-size:34px;
 
     margin-bottom:8px;
 
 }
 
-.auth-card p{
+.subtitle{
 
-    margin-bottom:25px;
+    color:#E9D5FF;
 
-    color:#DDD6FE;
-
-}
-
-input{
-
-    width:100%;
-
-    padding:15px;
-
-    margin-bottom:15px;
-
-    border:none;
-
-    border-radius:15px;
+    margin-bottom:28px;
 
     font-size:15px;
 
 }
 
-button{
+/* ===== INPUT ===== */
+
+.input-group{
+
+    text-align:left;
+
+    margin-bottom:18px;
+
+}
+
+.input-group label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    color:#DDD6FE;
+
+    font-size:14px;
+
+}
+
+.input-group input{
+
+    width:100%;
+
+    padding:15px 18px;
+
+    border:none;
+
+    border-radius:18px;
+
+    outline:none;
+
+    font-size:15px;
+
+    background:rgba(255,255,255,.9);
+
+    transition:.25s;
+
+}
+
+.input-group input:focus{
+
+    transform:scale(1.02);
+
+    box-shadow:0 0 15px rgba(168,85,247,.35);
+
+}
+
+/* ===== BUTTON ===== */
+
+#loginBtn{
 
     width:100%;
 
@@ -103,31 +198,112 @@ button{
 
     border:none;
 
-    border-radius:15px;
+    border-radius:18px;
 
-    background:#9333EA;
+    background:linear-gradient(
+        135deg,
+        #9333EA,
+        #7C3AED
+    );
 
     color:white;
 
     font-size:16px;
 
-    font-weight:bold;
+    font-weight:600;
 
     cursor:pointer;
 
-}
-
-button:hover{
-
-    background:#A855F7;
+    transition:.25s;
 
 }
+
+#loginBtn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 10px 25px rgba(124,58,237,.4);
+
+}
+
+/* ===== DIVIDER ===== */
+
+.divider{
+
+    margin:25px 0;
+
+    color:#DDD6FE;
+
+    position:relative;
+
+}
+
+.divider::before,
+.divider::after{
+
+    content:"";
+
+    position:absolute;
+
+    top:50%;
+
+    width:35%;
+
+    height:1px;
+
+    background:rgba(255,255,255,.35);
+
+}
+
+.divider::before{
+    left:0;
+}
+
+.divider::after{
+    right:0;
+}
+
+/* ===== GOOGLE ===== */
+
+.google-btn{
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:white;
+
+    color:#374151;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.google-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* ===== LINK ===== */
 
 .bottom-text{
 
-    margin-top:20px;
+    margin-top:25px;
 
-    color:#EDE9FE;
+    color:#E9D5FF;
+
+    font-size:14px;
 
 }
 
@@ -135,8 +311,41 @@ button:hover{
 
     color:white;
 
-    font-weight:bold;
+    font-weight:700;
 
     text-decoration:none;
+
+}
+
+.bottom-text a:hover{
+
+    text-decoration:underline;
+
+}
+
+/* ===== ĐIỆN THOẠI ===== */
+
+@media(max-width:768px){
+
+    .auth-container{
+
+        padding:28px;
+
+    }
+
+    .logo{
+
+        width:80px;
+        height:80px;
+
+        font-size:36px;
+
+    }
+
+    .auth-container h1{
+
+        font-size:28px;
+
+    }
 
 }

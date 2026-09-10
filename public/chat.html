@@ -1,86 +1,53 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>MYMY Chat</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYMY Chat</title>
 
-    <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="chat.css">
 </head>
 
 <body>
 
 <div class="chat-app">
 
-    <!-- Sidebar -->
-    <div class="sidebar">
+  <!-- Header -->
+  <header class="chat-header">
 
-        <div class="logo">
-            💜 MYMY
-        </div>
+    <button id="backBtn">⬅</button>
 
-        <input id="search" placeholder="🔍 Tìm cuộc trò chuyện">
+    <div class="user">
 
-        <div class="conversation-list" id="conversationList">
+      <div class="avatar" id="roomAvatar">💜</div>
 
-            <div class="conversation active">
-
-                <div class="avatar">💜</div>
-
-                <div class="info">
-                    <h4>Phòng Gia Đình</h4>
-                    <p>Đang hoạt động</p>
-                </div>
-
-            </div>
-
-        </div>
+      <div>
+        <h3 id="roomName">Gia Đình</h3>
+        <p>🟢 Đang hoạt động</p>
+      </div>
 
     </div>
 
-    <!-- Khung Chat -->
-    <div class="chat-box">
+    <button id="callBtn">📞</button>
 
-        <div class="chat-header">
+  </header>
 
-            <div class="header-user">
+  <!-- Tin nhắn -->
+  <main id="messages" class="messages"></main>
 
-                <div class="avatar big">💜</div>
+  <!-- Thanh nhập -->
+  <footer class="send-bar">
 
-                <div>
-                    <h3 id="roomName">MYMY ROOM</h3>
-                    <span class="online">🟢 Online</span>
-                </div>
+    <button id="emojiBtn">😊</button>
 
-            </div>
+    <input
+      id="messageInput"
+      placeholder="Aa..."
+    >
 
-            <div class="header-actions">
+    <button id="sendBtn">➤</button>
 
-                <button id="callBtn">📞</button>
-
-                <button id="backBtn">🏠</button>
-
-            </div>
-
-        </div>
-
-        <!-- Tin nhắn -->
-        <div class="messages" id="messages"></div>
-
-        <!-- Thanh nhập -->
-        <div class="send-box">
-
-            <input
-                id="messageInput"
-                placeholder="Nhập tin nhắn..."
-            >
-
-            <button id="sendBtn">
-                ➤
-            </button>
-
-        </div>
-
-    </div>
+  </footer>
 
 </div>
 
