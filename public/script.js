@@ -146,10 +146,15 @@ window.openChat=(room)=>{
 
 // ================= GỌI =================
 
-window.openCall=(room)=>{
+window.openCall = (room) => {
 
-    window.location.href=
-    `call.html?room=${encodeURIComponent(room)}&username=${currentUser.username}`;
+    socket.emit("call-user", {
+        room,
+        username: currentUser.username
+    });
+
+    window.location.href =
+        `call.html?room=${encodeURIComponent(room)}&username=${currentUser.username}`;
 
 };
 
@@ -182,5 +187,29 @@ socket.on("room-users",(users)=>{
         `;
 
     });
+
+});
+socket.on("incoming-call", (data) => {
+
+    const ok = confirm(`📞 ${data.username} đang gọi cho bạn`);
+
+    if (ok) {
+
+        socket.emit("accept-call", {
+            room: data.room,
+            username: currentUser.username
+        });
+
+        window.location.href =
+            `call.html?room=${encodeURIComponent(data.room)}&username=${currentUser.username}`;
+
+    } else {
+
+        socket.emit("reject-call", {
+            room: data.room,
+            username: currentUser.username
+        });
+
+    }
 
 });

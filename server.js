@@ -2,8 +2,8 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const { AccessToken } = require("livekit-server-sdk");
-const LIVEKIT_API_KEY = process.env.APIj9JDN9zXWvbf;
-const LIVEKIT_API_SECRET = process.env.cAhenO9QOp2ucmciJPsfMjKJgdVeasxZcUlPDMaEsA9A;
+const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY;
+const LIVEKIT_API_SECRET = process.env.LIVEKIT_API_SECRET;
 const app = express();
 const server = http.createServer(app);
 

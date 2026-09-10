@@ -32,6 +32,19 @@ async function startCall() {
 
     // Kết nối
     await lkRoom.connect(LIVEKIT_URL, data.token);
+    lkRoom.on("trackSubscribed", (track) => {
+
+    if (track.kind === "audio") {
+
+        const audio = track.attach();
+
+        document.body.appendChild(audio);
+
+        audio.play();
+
+    }
+
+});
 
     // Xin quyền Microphone
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -75,14 +88,16 @@ function startTimer(){
 
 // ================= MIC =================
 
-document.getElementById("micBtn").onclick = async ()=>{
+let micOn = true;
 
-    micEnabled = !micEnabled;
+document.getElementById("micBtn").onclick = async () => {
 
-    await lkRoom.localParticipant.setMicrophoneEnabled(micEnabled);
+    micOn = !micOn;
+
+    await lkRoom.localParticipant.setMicrophoneEnabled(micOn);
 
     document.getElementById("micBtn").innerHTML =
-        micEnabled ? "🎤" : "🔇";
+        micOn ? "🎤" : "🔇";
 
 };
 
