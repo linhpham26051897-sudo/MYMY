@@ -8,7 +8,8 @@ let room = "";
 
 let roomConnection = null;
 let micEnabled = true;
-
+let callSeconds = 0;
+let timer = null;
 /* ====================== VÀO PHÒNG ====================== */
 
 document.getElementById("join").onclick = async () => {
@@ -108,6 +109,14 @@ document.getElementById("call").onclick = async () => {
         await roomConnection.localParticipant.setMicrophoneEnabled(true);
 
         status.innerHTML = "✅ Đã kết nối cuộc gọi";
+        startTimer();
+
+document.getElementById("callName").innerHTML =
+    "📞 Đang gọi cùng " + username;
+
+document.querySelector(".call-avatar").innerHTML = "🎙️";
+
+document.querySelector(".call-avatar").classList.add("calling");
 
     } catch (err) {
 
@@ -148,6 +157,14 @@ document.getElementById("hangup").onclick = async () => {
     roomConnection = null;
 
     status.innerHTML = "📴 Đã cúp máy";
+    stopTimer();
+
+document.getElementById("callName").innerHTML =
+    "MYMY ROOM";
+
+document.querySelector(".call-avatar").innerHTML = "💜";
+
+document.querySelector(".call-avatar").classList.remove("calling");
 
 };
 
@@ -171,5 +188,93 @@ socket.on("room-users", (users) => {
     } else {
         members.classList.remove("online");
     }
+
+});
+function startTimer(){
+
+    clearInterval(timer);
+
+    callSeconds = 0;
+
+    timer = setInterval(()=>{
+
+        callSeconds++;
+
+        const min = String(Math.floor(callSeconds/60)).padStart(2,"0");
+        const sec = String(callSeconds%60).padStart(2,"0");
+
+        document.querySelector(".call-time").innerHTML =
+            "⏱️ " + min + ":" + sec;
+
+    },1000);
+
+}
+
+function stopTimer(){
+
+    clearInterval(timer);
+
+    document.querySelector(".call-time").innerHTML =
+        "⏱️ 00:00";
+
+}
+/* ================= CHAT ================= */
+
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const messages = document.getElementById("messages");
+
+function addMessage(data, mine){
+
+    const div = document.createElement("div");
+
+    div.className = mine
+        ? "message mine"
+        : "message other";
+
+    div.innerHTML = `
+        <div class="sender">
+            ${data.username} • ${data.time}
+        </div>
+
+        <div>${data.message}</div>
+    `;
+
+    messages.appendChild(div);
+
+    messages.scrollTop = messages.scrollHeight;
+
+}
+
+sendBtn.onclick = () => {
+
+    const text = messageInput.value.trim();
+
+    if(text === "") return;
+
+    socket.emit("send-message",{
+        room,
+        username,
+        message:text,
+    });
+
+    messageInput.value = "";
+
+};
+
+messageInput.addEventListener("keydown",(e)=>{
+
+    if(e.key === "Enter"){
+        sendBtn.click();
+    }
+
+});
+
+socket.on("new-message",(data)=>{
+
+    addMessage(
+        data,
+        data.username === username
+    );
 
 });

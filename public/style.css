@@ -1,32 +1,109 @@
+/* ===== FONT & BODY ===== */
+
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
 }
 
 body{
-    background:#120B2F;
+
+    min-height:100vh;
+
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
-    font-family:Arial,sans-serif;
-}
 
-.container{
-
-    width:360px;
-
-    background:#24124D;
+    background:linear-gradient(
+        135deg,
+        #5B21B6,
+        #7C3AED,
+        #2563EB
+    );
 
     padding:25px;
 
-    border-radius:20px;
+}
 
-    box-shadow:0 0 30px rgba(155,100,255,.3);
+/* ===== KHUNG CHÍNH ===== */
+
+.container{
+
+    width:900px;
+    max-width:100%;
+
+    background:rgba(255,255,255,.18);
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,.25);
+
+    border-radius:30px;
+
+    padding:25px;
+
+    box-shadow:0 20px 50px rgba(0,0,0,.25);
+
+}
+/* ===== HEADER ===== */
+
+.header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:25px;
 
 }
 
+.profile{
+
+    display:flex;
+    align-items:center;
+    gap:15px;
+
+}
+
+.avatar{
+
+    width:70px;
+    height:70px;
+
+    border-radius:50%;
+
+    background:linear-gradient(
+        135deg,
+        #A855F7,
+        #EC4899
+    );
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:32px;
+
+    color:white;
+
+    box-shadow:0 10px 25px rgba(168,85,247,.5);
+
+}
+
+.user-info h2{
+
+    color:white;
+    font-size:28px;
+
+}
+
+.user-info p{
+
+    color:#D1FAE5;
+    font-size:14px;
+
+}
 h1{
     color:#D8B4FE;
     text-align:center;
@@ -41,57 +118,603 @@ h1{
 input{
 
     width:100%;
-    padding:12px;
 
-    margin-bottom:15px;
+    padding:16px 20px;
 
     border:none;
 
-    border-radius:10px;
+    border-radius:18px;
+
+    background:rgb(232, 232, 234);
+
+    margin-bottom:15px;
+
+    font-size:16px;
+
+    outline:none;
+
+    transition:.25s;
+
+}
+
+input:focus{
+
+    transform:scale(1.02);
+
+    box-shadow:0 0 15px rgba(124,58,237,.35);
+
 }
 
 button{
 
     width:100%;
 
-    padding:12px;
+    padding:15px;
 
-    margin-top:10px;
+    margin-bottom:12px;
 
     border:none;
 
-    border-radius:10px;
+    border-radius:18px;
 
-    background:#8B5CF6;
+    font-size:16px;
+    font-weight:600;
 
-    color:white;
+    color:rgb(248, 244, 244);
 
     cursor:pointer;
 
-    font-weight:bold;
+    transition:.25s;
+
 }
 
 button:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 10px 20px rgba(0,0,0,.2);
+
+}
+#join{
     background:#7C3AED;
 }
 
+#call{
+    background:#22C55E;
+}
+
+#mute{
+    background:#0a65e5;
+}
+
+#hangup{
+    background:#EF4444;
+}
 p{
     text-align:center;
     margin-top:15px;
     color:#CCC;
 }
 .info{
+
     margin-top:20px;
-    text-align:center;
+
+    background:rgba(255,255,255,.2);
+
+    padding:15px;
+
+    border-radius:18px;
+
 }
 
+#status,
 #members{
-    color:#C4B5FD;
-    margin-top:8px;
-    font-size:14px;
+
+    color:white;
+    margin:8px 0;
+
 }
 
 .online{
     color:#22C55E;
     font-weight:bold;
+}
+/* ================= LAYOUT ================= */
+
+.main-layout{
+
+    display:flex;
+
+    gap:20px;
+
+    align-items:flex-start;
+
+}
+
+/* ============ SIDEBAR ============ */
+
+.sidebar{
+
+    width:230px;
+
+    min-height:420px;
+
+    background:rgba(91,33,182,.9);
+
+    border-radius:25px;
+
+    padding:18px;
+
+    color:white;
+
+}
+
+.sidebar h3{
+
+    margin-bottom:15px;
+
+    font-size:18px;
+
+}
+
+.userCard{
+
+    background:rgba(255,255,255,.12);
+
+    padding:12px;
+
+    border-radius:15px;
+
+    margin-bottom:10px;
+
+    transition:.25s;
+
+    cursor:pointer;
+
+}
+
+.userCard:hover{
+
+    background:rgba(255,255,255,.25);
+
+    transform:translateX(4px);
+
+}
+
+/* ============ CONTENT ============ */
+
+.content{
+
+    flex:1;
+
+}
+
+/* ============ CALL CARD ============ */
+
+.call-card{
+
+    margin-top:20px;
+
+    background:rgba(255,255,255,.18);
+
+    border-radius:25px;
+
+    padding:25px;
+
+    text-align:center;
+
+    color:white;
+
+}
+
+.call-avatar{
+
+    width:120px;
+
+    height:120px;
+
+    border-radius:50%;
+
+    margin:auto;
+
+    margin-bottom:15px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:60px;
+
+    background:linear-gradient(135deg,#9333EA,#EC4899);
+
+    box-shadow:0 12px 25px rgba(236,72,153,.35);
+
+}
+/* ===== CALL CARD MỚI ===== */
+
+.call-card{
+
+    margin-top:22px;
+
+    padding:35px 25px;
+
+    text-align:center;
+
+    border-radius:28px;
+
+    background:linear-gradient(
+        180deg,
+        rgba(255,255,255,.25),
+        rgba(255,255,255,.12)
+    );
+
+    backdrop-filter:blur(18px);
+
+}
+
+/* Avatar lớn */
+
+.call-avatar{
+
+    width:140px;
+    height:140px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:64px;
+
+    color:white;
+
+    background:linear-gradient(
+        135deg,
+        #9333EA,
+        #EC4899
+    );
+
+    box-shadow:
+        0 0 35px rgba(236,72,153,.5),
+        0 0 80px rgba(147,51,234,.35);
+
+    animation:pulseAvatar 2s infinite;
+
+}
+
+/* Tên phòng */
+
+#callName{
+
+    color:white;
+
+    margin-top:20px;
+
+    font-size:28px;
+
+    font-weight:700;
+
+}
+
+/* Trạng thái */
+
+#status{
+
+    color:#EDE9FE;
+
+    margin-top:8px;
+
+    font-size:16px;
+
+}
+
+/* Đồng hồ */
+
+.call-time{
+
+    display:inline-block;
+
+    margin:18px 0;
+
+    padding:10px 20px;
+
+    border-radius:50px;
+
+    background:rgba(255,255,255,.18);
+
+    color:white;
+
+    font-weight:600;
+
+}
+
+/* Hiệu ứng avatar */
+
+@keyframes pulseAvatar{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.06);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
+}
+/* ================== ONLINE ================== */
+
+#onlineStatus{
+    color:#7CFC8A;
+    animation:blinkOnline 1.5s infinite;
+}
+
+@keyframes blinkOnline{
+
+    0%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:.4;
+    }
+
+    100%{
+        opacity:1;
+    }
+
+}
+
+/* ================== AVATAR GỌI ================== */
+
+.call-avatar{
+    position:relative;
+    overflow:visible;
+}
+
+/* Sóng tròn */
+
+.call-avatar::before,
+.call-avatar::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:100%;
+    height:100%;
+
+    border-radius:50%;
+
+    border:4px solid rgba(236,72,153,.5);
+
+    animation:ring 2.5s infinite;
+
+}
+
+.call-avatar::after{
+    animation-delay:1s;
+}
+
+@keyframes ring{
+
+    0%{
+        transform:scale(1);
+        opacity:.8;
+    }
+
+    100%{
+        transform:scale(1.8);
+        opacity:0;
+    }
+
+}
+#call{
+
+    background:linear-gradient(135deg,#22C55E,#16A34A);
+
+}
+
+#call:hover{
+
+    transform:translateY(-3px) scale(1.03);
+
+    box-shadow:0 10px 30px rgba(34,197,94,.4);
+
+}
+
+#hangup:hover{
+
+    box-shadow:0 10px 30px rgba(239,68,68,.4);
+
+}
+
+#mute:hover{
+
+    box-shadow:0 10px 30px rgba(59,130,246,.4);
+
+}
+/* ================= CHAT ================= */
+
+.chat-card{
+
+    margin-top:25px;
+
+    padding:20px;
+
+    border-radius:25px;
+
+    background:rgba(255,255,255,.18);
+
+    backdrop-filter:blur(18px);
+
+}
+
+.chat-card h3{
+
+    color:white;
+
+    margin-bottom:15px;
+
+}
+
+.messages{
+
+    height:250px;
+
+    overflow-y:auto;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+    padding:10px;
+
+    border-radius:20px;
+
+    background:rgba(255,255,255,.08);
+
+}
+
+/* Bong bóng chat */
+
+.message{
+
+    max-width:75%;
+
+    padding:12px 16px;
+
+    border-radius:18px;
+
+    color:white;
+
+    word-wrap:break-word;
+
+    animation:fadeMessage .25s;
+
+}
+
+.mine{
+
+    background:#7C3AED;
+
+    align-self:flex-end;
+
+    border-bottom-right-radius:5px;
+
+}
+
+.other{
+
+    background:#334155;
+
+    align-self:flex-start;
+
+    border-bottom-left-radius:5px;
+
+}
+
+.sender{
+
+    font-size:12px;
+
+    opacity:.8;
+
+    margin-bottom:5px;
+
+}
+
+/* Thanh gửi */
+
+.send-bar{
+
+    display:flex;
+
+    gap:10px;
+
+    margin-top:15px;
+
+}
+
+.send-bar input{
+
+    flex:1;
+
+    margin:0;
+
+}
+
+.send-bar button{
+
+    width:60px;
+
+    margin:0;
+
+    background:#9333EA;
+
+}
+
+@keyframes fadeMessage{
+
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+@media(max-width:768px){
+
+.container{
+    padding:18px;
+}
+
+.user-info h2{
+    font-size:22px;
+}
+
+.avatar{
+    width:60px;
+    height:60px;
+    font-size:28px;
+}
+
+button{
+    font-size:15px;
+}
+.main-layout{
+
+    flex-direction:column;
+
+}
+
+.sidebar{
+
+    width:100%;
+    min-height:auto;
+
+}
+
+.call-avatar{
+
+    width:90px;
+    height:90px;
+    font-size:45px;
+
+}
 }

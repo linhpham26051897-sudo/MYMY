@@ -11,25 +11,92 @@
 
 <div class="container">
 
-    <h1>💜 MYMY</h1>
-    <p class="subtitle">Gọi điện & nhắn tin online</p>
+    <div class="header">
 
-    <input id="username" placeholder="Tên của bạn">
+        <div class="profile">
 
-    <input id="room" placeholder="Nhập mã phòng">
+            <div class="avatar">
+                
+            </div>
 
-    <button id="join">🚪 Vào phòng</button>
+            <div class="user-info">
+                <h2>MYMY</h2>
+                <p id="onlineStatus">🟢 Online</p>
+            </div>
 
-    <button id="call">📞 Gọi</button>
+        </div>
 
-    <button id="mute">🎤 Tắt Mic</button>
-
-    <button id="hangup">❌ Cúp máy</button>
-
-    <div class="info">
-        <p id="status">Chưa kết nối.</p>
-        <p id="members">👥 0 người trong phòng</p>
     </div>
+
+    <div class="main-layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+        <h3>👥 Thành viên</h3>
+
+        <div id="onlineList">
+
+            <div class="userCard">
+                🟢 Bạn
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PHẦN CHÍNH -->
+    <div class="content">
+
+        <input id="username" placeholder="Tên của bạn">
+
+        <input id="room" placeholder="Nhập mã phòng">
+
+        <button id="join"> Vào phòng</button>
+
+        <button id="call"> Gọi</button>
+
+        <button id="mute"> Tắt Mic</button>
+
+        <button id="hangup"> Cúp máy</button>
+
+        <div class="call-card">
+
+    <div class="call-avatar">
+        💜
+    </div>
+    <div class="chat-card">
+
+    <h3>💬 Tin nhắn phòng</h3>
+
+    <div id="messages" class="messages"></div>
+
+    <div class="send-bar">
+
+        <input
+            id="messageInput"
+            placeholder="Nhập tin nhắn..."
+        >
+
+        <button id="sendBtn">➤</button>
+
+    </div>
+
+</div>
+
+    <h2 id="callName">MYMY ROOM</h2>
+
+    <p id="status">📡 Chưa kết nối.</p>
+
+    <div class="call-time">
+        ⏱️ 00:00
+    </div>
+
+    <p id="members">
+        👥 0 người trong phòng
+    </p>
+
+</div>
     <audio id="remoteAudio" autoplay playsinline></audio>
     <audio id="ringtone" loop>
     <source src="ringtone.mp3" type="audio/mpeg">

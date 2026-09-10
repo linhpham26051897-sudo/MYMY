@@ -41,6 +41,20 @@ io.on("connection", (socket) => {
 
     console.log(`${username} vào phòng ${room}`);
   });
+  /* ================= CHAT ================= */
+
+    socket.on("send-message", ({ room, username, message }) => {
+
+        io.to(room).emit("new-message", {
+        username,
+        message,
+        time: new Date().toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+        }),
+    });
+
+    });
 
   socket.on("disconnect", () => {
     const room = socket.room;
