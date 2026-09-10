@@ -57,10 +57,14 @@ document.getElementById("join").onclick = async () => {
 };
 document.getElementById("call").onclick = async () => {
 
+    if (!localStream) {
+        alert("Bạn phải bấm 'Vào phòng' trước.");
+        return;
+    }
+
     createPeer();
 
     const offer = await peer.createOffer();
-
     await peer.setLocalDescription(offer);
 
     socket.emit("offer", {
@@ -70,7 +74,6 @@ document.getElementById("call").onclick = async () => {
 
     status.innerHTML = "📞 Đang gọi...";
 };
-
 // Có người tham gia
 socket.on("user-joined", user => {
 
@@ -109,16 +112,22 @@ function createPeer() {
     });
 
     // Nhận âm thanh từ người bên kia
-    peer.ontrack = (event) => {
+    peer.ontrack = async (event) => {
 
-        console.log("Đã nhận audio");
+    console.log("Đã nhận audio");
 
-        remoteAudio.srcObject = event.streams[0];
+    remoteAudio.srcObject = event.streams[0];
 
-        remoteAudio.play().catch(err => {
-            console.log("Không phát được audio:", err);
-        });
-    };
+    remoteAudio.muted = false;
+    remoteAudio.volume = 1;
+
+    try {
+        await remoteAudio.play();
+        console.log("Đang phát âm thanh.");
+    } catch (err) {
+        console.log("Lỗi phát âm thanh:", err);
+    }
+};
 
     // ICE Candidate
     peer.onicecandidate = (event) => {
