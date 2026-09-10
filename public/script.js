@@ -18,9 +18,8 @@ const remoteAudio = document.getElementById("remoteAudio");
 
 const config = {
     iceServers: [
-        {
-            urls: "stun:stun.l.google.com:19302"
-        },
+        { urls: "stun:stun.l.google.com:19302" },
+
         {
             urls: "turn:openrelay.metered.ca:80",
             username: "openrelayproject",
@@ -110,24 +109,31 @@ function createPeer() {
     });
 
     // Nhận âm thanh từ người bên kia
-    peer.ontrack = event => {
+    peer.ontrack = (event) => {
 
-    remoteAudio.srcObject = event.streams[0];
+        console.log("Đã nhận audio");
 
-    remoteAudio.play().catch(() => {
-        console.log("Đợi người dùng tương tác để phát âm thanh.");
-    });
+        remoteAudio.srcObject = event.streams[0];
 
-};
+        remoteAudio.play().catch(err => {
+            console.log("Không phát được audio:", err);
+        });
+    };
 
-    // Gửi ICE Candidate cho đối phương
-    peer.onicecandidate = event => {
+    // ICE Candidate
+    peer.onicecandidate = (event) => {
         if (event.candidate) {
             socket.emit("candidate", {
                 room,
                 candidate: event.candidate
             });
         }
+    };
+
+    // Theo dõi trạng thái kết nối
+    peer.onconnectionstatechange = () => {
+        console.log("Connection:", peer.connectionState);
+        status.innerHTML = "📶 " + peer.connectionState;
     };
 }
 socket.on("offer", async offer => {
