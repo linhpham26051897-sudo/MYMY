@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MYMY</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>💜 MYMY</h1>
+    <p class="subtitle">Gọi điện & nhắn tin online</p>
+
+    <input id="username" placeholder="Tên của bạn">
+
+    <input id="room" placeholder="Nhập mã phòng">
+
+    <button id="join">🚪 Vào phòng</button>
+
+    <button id="call">📞 Gọi</button>
+
+    <button id="mute">🎤 Tắt Mic</button>
+
+    <button id="hangup">❌ Cúp máy</button>
+
+    <div class="info">
+        <p id="status">Chưa kết nối.</p>
+        <p id="members">👥 0 người trong phòng</p>
+    </div>
+    <audio id="remoteAudio" autoplay></audio>
+    <audio id="ringtone" loop>
+    <source src="ringtone.mp3" type="audio/mpeg">
+</audio>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
