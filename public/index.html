@@ -12,12 +12,70 @@
 <div class="container">
 
     <div class="header">
+        <div class="menu-tabs">
+
+    <button id="openChat" class="tab active">
+         Chat
+    </button>
+
+    <button id="openCall" class="tab">
+         Gọi điện
+    </button>
+
+</div>
+<div class="home-page">
+
+    <!-- Thanh tìm kiếm -->
+    <div class="search-box">
+        <input id="searchRoom" placeholder="🔍 Tìm phòng hoặc bạn bè...">
+    </div>
+
+    <!-- Danh sách phòng -->
+    <div class="chat-list" id="chatList">
+
+        <div class="chat-item">
+            <div class="chat-avatar">💜</div>
+
+            <div class="chat-info">
+                <h3>Phòng Gia Đình</h3>
+                <p>Nhấn để trò chuyện</p>
+            </div>
+
+            <button class="enter-chat" data-room="family">
+                💬
+            </button>
+        </div>
+
+        <div class="chat-item">
+            <div class="chat-avatar">🎮</div>
+
+            <div class="chat-info">
+                <h3>Nhóm Game</h3>
+                <p> thành viên online</p>
+            </div>
+
+            <button class="enter-chat" data-room="game">
+                💬
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Tạo phòng -->
+    <button id="createRoomBtn" class="create-room">
+        ➕ Tạo phòng mới
+    </button>
+
+</div>
 
         <div class="profile">
 
             <div class="avatar">
                 
             </div>
+            <button id="logoutBtn">
+     Đăng xuất
+</button>
 
             <div class="user-info">
                 <h2>MYMY</h2>
@@ -47,18 +105,6 @@
 
     <!-- PHẦN CHÍNH -->
     <div class="content">
-
-        <input id="username" placeholder="Tên của bạn">
-
-        <input id="room" placeholder="Nhập mã phòng">
-
-        <button id="join"> Vào phòng</button>
-
-        <button id="call"> Gọi</button>
-
-        <button id="mute"> Tắt Mic</button>
-
-        <button id="hangup"> Cúp máy</button>
 
         <div class="call-card">
 

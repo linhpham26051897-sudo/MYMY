@@ -310,3 +310,98 @@ socket.on("new-message",(data)=>{
     );
 
 });
+// ===== MỞ TRANG CHAT =====
+document.getElementById("openChat").onclick = () => {
+
+    const roomCode = document.getElementById("room").value.trim();
+    const user = document.getElementById("username").value.trim();
+
+    if (!roomCode || !user) {
+        alert("Vào phòng trước.");
+        return;
+    }
+
+    window.location.href =
+        `chat.html?room=${roomCode}&username=${user}`;
+
+};
+
+// ===== MỞ TRANG GỌI =====
+document.getElementById("openCall").onclick = () => {
+
+    const roomCode = document.getElementById("room").value.trim();
+    const user = document.getElementById("username").value.trim();
+
+    if (!roomCode || !user) {
+        alert("Vào phòng trước.");
+        return;
+    }
+
+    window.location.href =
+        `call.html?room=${roomCode}&username=${user}`;
+
+};
+/* ================= TRANG CHỦ ================= */
+
+// Lấy user đã đăng nhập
+const currentUser =
+    JSON.parse(localStorage.getItem("currentUser"));
+
+if(currentUser){
+
+    document.querySelector(".user-info h2").innerHTML =
+        currentUser.fullname;
+
+}
+
+// Chuyển sang trang Chat
+document.querySelectorAll(".enter-chat").forEach(btn=>{
+
+    btn.onclick = ()=>{
+
+        const room = btn.dataset.room;
+
+        window.location.href =
+            `chat.html?room=${room}&username=${currentUser.username}`;
+
+    };
+
+});
+
+// Tạo phòng mới
+document.getElementById("createRoomBtn").onclick = ()=>{
+
+    const room = prompt("Nhập tên phòng mới:");
+
+    if(!room) return;
+
+    const list =
+        document.getElementById("chatList");
+
+    list.innerHTML += `
+        <div class="chat-item">
+
+            <div class="chat-avatar">💬</div>
+
+            <div class="chat-info">
+                <h3>${room}</h3>
+                <p>Phòng mới tạo</p>
+            </div>
+
+            <button class="enter-chat" data-room="${room}">
+                💬
+            </button>
+
+        </div>
+    `;
+
+    location.reload();
+
+};
+document.getElementById("logoutBtn").onclick = ()=>{
+
+    localStorage.removeItem("currentUser");
+
+    window.location.href="login.html";
+
+};
