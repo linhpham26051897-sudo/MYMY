@@ -75,6 +75,8 @@ io.on("connection", socket => {
 
 });
 
-server.listen(3000, "0.0.0.0", () => {
-    console.log("MYMY chạy trên mọi thiết bị");
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, "0.0.0.0", () => {
+    console.log(`MYMY chạy tại cổng ${PORT}`);
 });
