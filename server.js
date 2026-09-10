@@ -44,6 +44,14 @@ io.on("connection", (socket) => {
 
     console.log(`${username} vào phòng ${room}`);
   });
+  socket.on("send-message",(data)=>{
+
+    io.to(data.room).emit("new-message",{
+        username:data.username,
+        message:data.message
+    });
+
+});
   /* ================= CHAT ================= */
 
     socket.on("send-message", ({ room, username, message }) => {

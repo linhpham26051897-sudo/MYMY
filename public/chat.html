@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>MYMY Chat</title>
+
+    <link rel="stylesheet" href="chat.css">
+</head>
+
+<body>
+
+<div class="chat-app">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+        <div class="logo">
+            💜 MYMY
+        </div>
+
+        <input id="search" placeholder="🔍 Tìm cuộc trò chuyện">
+
+        <div class="conversation-list" id="conversationList">
+
+            <div class="conversation active">
+
+                <div class="avatar">💜</div>
+
+                <div class="info">
+                    <h4>Phòng Gia Đình</h4>
+                    <p>Đang hoạt động</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Khung Chat -->
+    <div class="chat-box">
+
+        <div class="chat-header">
+
+            <div class="header-user">
+
+                <div class="avatar big">💜</div>
+
+                <div>
+                    <h3 id="roomName">MYMY ROOM</h3>
+                    <span class="online">🟢 Online</span>
+                </div>
+
+            </div>
+
+            <div class="header-actions">
+
+                <button id="callBtn">📞</button>
+
+                <button id="backBtn">🏠</button>
+
+            </div>
+
+        </div>
+
+        <!-- Tin nhắn -->
+        <div class="messages" id="messages"></div>
+
+        <!-- Thanh nhập -->
+        <div class="send-box">
+
+            <input
+                id="messageInput"
+                placeholder="Nhập tin nhắn..."
+            >
+
+            <button id="sendBtn">
+                ➤
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="chat.js"></script>
+
+</body>
+</html>
