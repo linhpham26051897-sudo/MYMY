@@ -677,6 +677,44 @@ p{
     }
 
 }
+/* ===== DANH SÁCH THÀNH VIÊN ===== */
+
+.userCard{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px;
+    border-radius:15px;
+    margin-bottom:10px;
+    background:rgba(255,255,255,.12);
+}
+
+.user-avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#EC4899,#9333EA);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:bold;
+}
+
+.user-name{
+    color:white;
+    font-size:15px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#22C55E;
+}
 
 @media(max-width:768px){
 

@@ -180,14 +180,35 @@ socket.on("user-left", (user) => {
 
 socket.on("room-users", (users) => {
 
-    members.innerHTML =
-        "👥 " + users.length + " người trong phòng";
+    // Cập nhật số người
+    members.innerHTML = `👥 ${users.length} người trong phòng`;
 
-    if (users.length >= 2) {
-        members.classList.add("online");
-    } else {
-        members.classList.remove("online");
-    }
+    // Lấy khung danh sách thành viên
+    const onlineList = document.getElementById("onlineList");
+
+    // Xóa danh sách cũ
+    onlineList.innerHTML = "";
+
+    // Thêm từng thành viên
+    users.forEach((user) => {
+
+        const card = document.createElement("div");
+        card.className = "userCard";
+
+        // Avatar là chữ cái đầu
+        const avatar = user.charAt(0).toUpperCase();
+
+        card.innerHTML = `
+            <div class="user-avatar">${avatar}</div>
+
+            <div class="user-name">
+                <span class="dot"></span>
+                ${user}
+            </div>
+        `;
+
+        onlineList.appendChild(card);
+    });
 
 });
 function startTimer(){
