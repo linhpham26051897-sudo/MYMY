@@ -1,7 +1,8 @@
+const { AccessToken } = require("livekit-server-sdk");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-
+const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -79,9 +80,30 @@ io.on("connection", socket => {
     });
 
 });
+app.get("/token", async (req, res) => {
 
-const PORT = process.env.PORT || 3000;
+    const room = req.query.room;
+    const username = req.query.username;
 
+    const at = new AccessToken(
+        process.env.LIVEKIT_API_KEY,
+        process.env.LIVEKIT_API_SECRET,
+        { identity: username }
+    );
+
+    at.addGrant({
+        roomJoin: true,
+        room,
+        canPublish: true,
+        canSubscribe: true
+    });
+
+    res.json({
+        token: await at.toJwt(),
+        url: process.env.LIVEKIT_URL
+    });
+
+});
 server.listen(PORT, "0.0.0.0", () => {
     console.log(`MYMY chạy tại cổng ${PORT}`);
 });

@@ -14,6 +14,7 @@ let username = "";
 let peer;
 let localStream;
 let pendingCandidates = [];
+let roomConnection;
 const remoteAudio = document.getElementById("remoteAudio");
 
 const config = {
@@ -58,22 +59,34 @@ document.getElementById("join").onclick = async () => {
 };
 document.getElementById("call").onclick = async () => {
 
-    if (!localStream) {
-        alert("Bạn phải bấm 'Vào phòng' trước.");
-        return;
-    }
+    const res = await fetch(
+        `/token?room=${room}&username=${username}`
+    );
 
-    createPeer();
+    const data = await res.json();
 
-    const offer = await peer.createOffer();
-    await peer.setLocalDescription(offer);
+    roomConnection = new LivekitClient.Room();
 
-    socket.emit("offer", {
-        room,
-        offer
-    });
+    await roomConnection.connect(data.url, data.token);
 
-    status.innerHTML = "📞 Đang gọi...";
+    await roomConnection.localParticipant.enableMicrophone();
+
+    status.innerHTML = "📞 Đã kết nối cuộc gọi";
+
+    roomConnection.on(
+        LivekitClient.RoomEvent.TrackSubscribed,
+        (track) => {
+
+            if (track.kind === "audio") {
+
+                const audio = track.attach();
+                document.body.appendChild(audio);
+
+            }
+
+        }
+    );
+
 };
 // Có người tham gia
 socket.on("user-joined", user => {
