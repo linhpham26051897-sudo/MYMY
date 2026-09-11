@@ -1,3 +1,17 @@
+const fs = require("fs");
+const path = require("path");
+
+const USERS_FILE = path.join(__dirname, "database", "users.json");
+const ROOMS_FILE = path.join(__dirname, "database", "rooms.json");
+const MESSAGES_FILE = path.join(__dirname, "database", "messages.json");
+
+function readJSON(file) {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+}
+
+function writeJSON(file, data) {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -15,7 +29,7 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
-
+app.use(express.json());
 app.use(express.static("public"));
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/public/login.html");
@@ -24,7 +38,106 @@ app.get("/", (req, res) => {
 /* ================== PHÒNG CHAT ================== */
 
 const rooms = {};
+function generateRoomCode(){
 
+    return (
+        "MY" +
+        Math.random()
+            .toString(36)
+            .substring(2,6)
+            .toUpperCase()
+    );
+
+}
+app.post("/create-room",(req,res)=>{
+
+    const rooms = readJSON(ROOMS_FILE);
+
+    const { roomName, owner } = req.body;
+
+    if(!roomName){
+        return res.status(400).json({
+            message:"Thiếu tên phòng."
+        });
+    }
+
+    const roomCode = generateRoomCode();
+
+    const room = {
+
+        id:Date.now(),
+
+        roomCode,
+
+        roomName,
+
+        owner,
+
+        members:[owner],
+
+        createdAt:new Date()
+
+    };
+
+    rooms.push(room);
+
+    writeJSON(ROOMS_FILE,rooms);
+
+    res.json(room);
+
+});
+app.get("/rooms",(req,res)=>{
+
+    const rooms = readJSON(ROOMS_FILE);
+
+    res.json(rooms);
+
+});
+app.get("/search-room",(req,res)=>{
+
+    const keyword =
+        req.query.keyword.toLowerCase();
+
+    const rooms = readJSON(ROOMS_FILE);
+
+    const result = rooms.filter(room=>
+
+        room.roomName.toLowerCase().includes(keyword) ||
+
+        room.roomCode.toLowerCase().includes(keyword)
+
+    );
+
+    res.json(result);
+
+});
+app.post("/join-room-api",(req,res)=>{
+
+    const rooms = readJSON(ROOMS_FILE);
+
+    const { roomCode, username } = req.body;
+
+    const room = rooms.find(r=>r.roomCode===roomCode);
+
+    if(!room){
+
+        return res.status(404).json({
+            message:"Không tìm thấy phòng."
+        });
+
+    }
+
+    if(!room.members.includes(username)){
+
+        room.members.push(username);
+
+    }
+
+    writeJSON(ROOMS_FILE,rooms);
+
+    res.json(room);
+
+});
 io.on("connection", (socket) => {
   console.log("🟢 Có người kết nối:", socket.id);
 
@@ -62,6 +175,11 @@ io.on("connection", (socket) => {
     });
 
 });
+socket.on("typing", ({ room, username }) => {
+
+    socket.to(room).emit("user-typing", username);
+
+});
 // ================= GỌI ĐIỆN =================
 
 socket.on("call-user", ({ room, username }) => {
@@ -90,20 +208,6 @@ socket.on("reject-call", ({ room, username }) => {
     });
 
 });
-  /* ================= CHAT ================= */
-
-    socket.on("send-message", ({ room, username, message }) => {
-
-        io.to(room).emit("new-message", {
-        username,
-        message,
-        time: new Date().toLocaleTimeString("vi-VN", {
-            hour: "2-digit",
-            minute: "2-digit",
-        }),
-    });
-
-    });
 
   socket.on("disconnect", () => {
     const room = socket.room;

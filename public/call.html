@@ -1,56 +1,68 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MYMY Call</title>
 
-  <link rel="stylesheet" href="call.css">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MYMY Video Call</title>
+
+<link rel="stylesheet" href="call.css">
+
 </head>
 
 <body>
 
 <div class="call-page">
 
-  <!-- Quay lại -->
-  <button id="backBtn" class="back-btn">⬅</button>
+    <!-- Video người kia -->
+    <div id="remoteVideo" class="remote-video"></div>
 
-  <!-- Avatar -->
-  <div class="avatar-wrapper">
+    <!-- Camera mình -->
+    <video
+        id="localVideo"
+        autoplay
+        playsinline
+        muted
+        class="local-video">
+    </video>
 
-    <div class="ring"></div>
-    <div class="ring delay"></div>
+    <!-- Header -->
+    <div class="call-header">
 
-    <div class="avatar-big" id="avatarBig">
-      💜
+        <button id="backBtn">⬅</button>
+
+        <div>
+
+            <h2 id="roomName"></h2>
+
+            <p id="callStatus">
+                📡 Đang kết nối...
+            </p>
+
+        </div>
+
     </div>
 
-  </div>
+    <!-- Đồng hồ -->
+    <div id="timer" class="timer">
+        00:00
+    </div>
 
-  <!-- Tên phòng -->
-  <h1 id="roomName">Gia Đình</h1>
+    <!-- Thanh điều khiển -->
+    <div class="controls">
 
-  <p id="callStatus">
-    📡 Đang kết nối...
-  </p>
+        <button id="micBtn">🎤</button>
 
-  <!-- Đồng hồ -->
-  <div class="timer" id="timer">
-    00:00
-  </div>
+        <button id="cameraBtn">📹</button>
 
-  <!-- Điều khiển -->
-  <div class="controls">
+        <button id="switchCameraBtn">🔄</button>
 
-    <button id="micBtn" class="control gray">🎤</button>
+        <button id="speakerBtn">🔊</button>
 
-    <button id="speakerBtn" class="control blue">🔊</button>
+        <button id="hangupBtn" class="red">📞</button>
 
-    <button id="cameraBtn" class="control purple">📹</button>
-
-    <button id="hangupBtn" class="control red">📞</button>
-
-  </div>
+    </div>
 
 </div>
 
@@ -62,4 +74,5 @@
 <script src="call.js"></script>
 
 </body>
+
 </html>

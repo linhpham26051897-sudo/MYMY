@@ -32,22 +32,31 @@
 
   </header>
 
-  <!-- Tin nhắn -->
-  <main id="messages" class="messages"></main>
+ <!-- ================= KHU VỰC TIN NHẮN ================= -->
+<main class="messages-wrapper">
 
-  <!-- Thanh nhập -->
-  <footer class="send-bar">
+    <!-- Hiển thị "đang nhập..." -->
+    <div id="typingBox" class="typing-box"></div>
+
+    <!-- Danh sách tin nhắn -->
+    <div id="messages" class="messages"></div>
+
+</main>
+
+<!-- ================= THANH NHẬP TIN NHẮN ================= -->
+<footer class="send-bar">
 
     <button id="emojiBtn">😊</button>
 
     <input
-      id="messageInput"
-      placeholder="Aa..."
+        id="messageInput"
+        type="text"
+        placeholder="Nhập tin nhắn..."
     >
 
     <button id="sendBtn">➤</button>
 
-  </footer>
+</footer>
 
 </div>
 

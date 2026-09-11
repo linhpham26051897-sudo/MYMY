@@ -7,140 +7,143 @@ const username = params.get("username");
 
 document.getElementById("roomName").innerHTML = room;
 
-// URL LiveKit Cloud của bạn
-const LIVEKIT_URL = "wss://mymy-h3gfjpvp.livekit.cloud";
+const LIVEKIT_URL =
+"https://YOUR_PROJECT.livekit.cloud";
 
 let lkRoom;
-let localTrack;
-let micEnabled = true;
 
-// ================= BẮT ĐẦU CUỘC GỌI =================
 
-async function startCall() {
 
-    document.getElementById("callStatus").innerHTML = "📡 Đang kết nối...";
 
-    // Lấy token từ server
-    const res = await fetch(
-        `/token?room=${room}&username=${username}`
-    );
 
-    const data = await res.json();
 
-    // Tạo Room LiveKit
-    lkRoom = new LivekitClient.Room();
+let localVideoTrack;
+let localAudioTrack;
 
-    // Kết nối
-    await lkRoom.connect(LIVEKIT_URL, data.token);
-    lkRoom.on("trackSubscribed", (track) => {
+async function startCall(){
 
-    if (track.kind === "audio") {
+const res = await fetch(
+`/token?room=${room}&username=${username}`
+);
 
-        const audio = track.attach();
+const data = await res.json();
 
-        document.body.appendChild(audio);
+lkRoom = new LivekitClient.Room();
 
-        audio.play();
+await lkRoom.connect(
+LIVEKIT_URL,
+data.token
+);
 
-    }
+// Xin quyền Camera + Mic
+
+await lkRoom.localParticipant.setCameraEnabled(true);
+
+await lkRoom.localParticipant.setMicrophoneEnabled(true);
+
+// Lấy camera của mình
+
+const stream =
+await navigator.mediaDevices.getUserMedia({
+video:true,
+audio:true
+});
+
+document.getElementById("localVideo").srcObject =
+stream;
+
+document.getElementById("callStatus").innerHTML =
+"🟢 Đã kết nối";
+
+subscribeRemote();
+
+startTimer();
+
+}
+
+
+
+startCall();
+function subscribeRemote(){
+
+lkRoom.on(
+"trackSubscribed",
+(track)=>{
+
+if(track.kind==="video"){
+
+const video = track.attach();
+
+video.style.width="100%";
+video.style.height="100%";
+video.style.objectFit="cover";
+
+document.getElementById("remoteVideo").appendChild(video);
+
+}
+
+if(track.kind==="audio"){
+
+const audio = track.attach();
+
+document.body.appendChild(audio);
+
+audio.play();
+
+}
 
 });
 
-    // Xin quyền Microphone
-    const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true
-    });
-
-    localTrack = stream.getAudioTracks()[0];
-
-    // Publish microphone
-    await lkRoom.localParticipant.setMicrophoneEnabled(true);
-
-    document.getElementById("callStatus").innerHTML =
-        "🟢 Đã kết nối";
-
-    startTimer();
-
 }
+let mic=true;
 
-// ================= ĐỒNG HỒ =================
+micBtn.onclick=async()=>{
 
-let second = 0;
+mic=!mic;
 
-function startTimer(){
+await lkRoom.localParticipant.setMicrophoneEnabled(mic);
 
-    setInterval(()=>{
+micBtn.innerHTML=mic?"🎤":"🔇";
 
-        second++;
+};
+let camera=true;
 
-        const m =
-            String(Math.floor(second/60)).padStart(2,"0");
+cameraBtn.onclick=async()=>{
 
-        const s =
-            String(second%60).padStart(2,"0");
+camera=!camera;
 
-        document.getElementById("timer").innerHTML =
-            `${m}:${s}`;
+await lkRoom.localParticipant.setCameraEnabled(camera);
 
-    },1000);
-
-}
-
-// ================= MIC =================
-
-let micOn = true;
-
-document.getElementById("micBtn").onclick = async () => {
-
-    micOn = !micOn;
-
-    await lkRoom.localParticipant.setMicrophoneEnabled(micOn);
-
-    document.getElementById("micBtn").innerHTML =
-        micOn ? "🎤" : "🔇";
+cameraBtn.innerHTML=camera?"📹":"🚫";
 
 };
 
-// ================= LOA =================
+let facing="user";
 
-let speaker = true;
+switchCameraBtn.onclick = async ()=>{
 
-document.getElementById("speakerBtn").onclick = ()=>{
+facing =
+facing==="user"
+? "environment"
+: "user";
 
-    speaker = !speaker;
+const stream =
+await navigator.mediaDevices.getUserMedia({
+video:{
+facingMode:facing
+},
+audio:true
+});
 
-    document.getElementById("speakerBtn").style.opacity =
-        speaker ? "1" : ".5";
-
-};
-
-// ================= CAMERA (ĐỂ SAU) =================
-
-document.getElementById("cameraBtn").onclick = ()=>{
-
-    alert("🎥 Video sẽ làm ở Bài 8.");
-
-};
-
-// ================= CÚP MÁY =================
-
-document.getElementById("hangupBtn").onclick = async ()=>{
-
-    if(lkRoom){
-        await lkRoom.disconnect();
-    }
-
-    location.href = "index.html";
+document.getElementById("localVideo").srcObject=stream;
 
 };
 
-// ================= QUAY LẠI =================
 
-document.getElementById("backBtn").onclick = ()=>{
+hangupBtn.onclick=async()=>{
 
-    location.href =
-        `chat.html?room=${encodeURIComponent(room)}&username=${username}`;
+await lkRoom.disconnect();
+
+location.href="chat.html?room="+room+"&username="+username;
 
 };
-
-startCall();

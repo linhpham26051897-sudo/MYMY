@@ -22,47 +22,54 @@ currentUser.fullname.charAt(0).toUpperCase();
 
 // ================= PHÒNG CHAT =================
 
-const rooms = [
-    {
-        name:"Gia Đình",
-        icon:"💜",
-        last:"Tối nay gọi nhé!"
-    },
-    {
-        name:"Lớp CNTT",
-        icon:"💻",
-        last:"Có bài tập mới."
-    },
-    {
-        name:"Nhóm Game",
-        icon:"🎮",
-        last:"8 giờ tối chơi."
-    }
-];
+let rooms = [];
+
+async function loadRooms(){
+
+    const res = await fetch("/rooms");
+
+    rooms = await res.json();
+
+    renderRooms();
+
+}
+
+loadRooms();
 
 const chatList =
 document.getElementById("chatList");
 
 function renderRooms(){
 
-    chatList.innerHTML="";
+    chatList.innerHTML = "";
+
+    if(rooms.length===0){
+
+        chatList.innerHTML = `
+            <h3>Chưa có phòng nào.</h3>
+        `;
+        return;
+    }
 
     rooms.forEach(room=>{
 
         chatList.innerHTML += `
+
         <div class="room-card">
 
             <div class="room-left">
 
                 <div class="room-avatar">
-                    ${room.icon}
+                    💜
                 </div>
 
                 <div class="room-info">
 
-                    <h3>${room.name}</h3>
+                    <h3>${room.roomName}</h3>
 
-                    <p>${room.last}</p>
+                    <p>Mã: ${room.roomCode}</p>
+
+                    <p>${room.members.length} thành viên</p>
 
                 </div>
 
@@ -70,19 +77,22 @@ function renderRooms(){
 
             <div class="actions">
 
-                <button class="chat-btn"
-                onclick="openChat('${room.name}')">
+                <button
+                class="chat-btn"
+                onclick="joinChat('${room.roomCode}')">
                     💬
                 </button>
 
-                <button class="call-btn"
-                onclick="openCall('${room.name}')">
-                    📞
+                <button
+                class="call-btn"
+                onclick="joinCall('${room.roomCode}')">
+                    📹
                 </button>
 
             </div>
 
         </div>
+
         `;
 
     });
@@ -94,44 +104,61 @@ renderRooms();
 // ================= TÌM PHÒNG =================
 
 document.getElementById("searchRoom")
-.addEventListener("input",(e)=>{
+.addEventListener("input", async(e)=>{
 
-    const keyword =
-    e.target.value.toLowerCase();
+    const keyword = e.target.value;
 
-    const cards =
-    document.querySelectorAll(".room-card");
+    if(keyword===""){
+        loadRooms();
+        return;
+    }
 
-    cards.forEach(card=>{
+    const res = await fetch(
+        `/search-room?keyword=${keyword}`
+    );
 
-        const text =
-        card.innerText.toLowerCase();
+    rooms = await res.json();
 
-        card.style.display =
-        text.includes(keyword)
-        ? "flex"
-        : "none";
-
-    });
+    renderRooms();
 
 });
 
 // ================= TẠO PHÒNG =================
 
-document.getElementById("createRoomBtn").onclick=()=>{
+document.getElementById("createRoomBtn").onclick = async()=>{
 
-    const room =
-    prompt("Tên phòng mới:");
+    const roomName = prompt("Tên phòng:");
 
-    if(!room) return;
+    if(!roomName) return;
 
-    rooms.unshift({
-        name:room,
-        icon:"✨",
-        last:"Phòng mới tạo."
+    const res = await fetch("/create-room",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            roomName,
+            owner:currentUser.username
+
+        })
+
     });
 
-    renderRooms();
+    const room = await res.json();
+
+    alert(
+`🎉 Tạo thành công
+
+Tên: ${room.roomName}
+
+Mã phòng: ${room.roomCode}`
+    );
+
+    loadRooms();
 
 };
 
@@ -213,3 +240,53 @@ socket.on("incoming-call", (data) => {
     }
 
 });
+// ================= JOIN CHAT =================
+window.joinChat = async(roomCode)=>{
+
+    const res = await fetch("/join-room-api",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            roomCode,
+
+            username:currentUser.username
+
+        })
+
+    });
+
+    const room = await res.json();
+
+    location.href =
+`chat.html?room=${room.roomCode}&username=${currentUser.username}`;
+
+};
+window.joinCall = async(roomCode)=>{
+
+    await fetch("/join-room-api",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            roomCode,
+            username:currentUser.username
+
+        })
+
+    });
+
+    location.href=
+`call.html?room=${roomCode}&username=${currentUser.username}`;
+
+};
