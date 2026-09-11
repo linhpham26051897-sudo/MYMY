@@ -4,19 +4,18 @@ const params = new URLSearchParams(location.search);
 
 const room = params.get("room");
 
-socket.emit("join-room",{
-    room,
-    username
-});
+
 const username = params.get("username");
 
+// Hiển thị tên phòng
 document.getElementById("roomName").textContent = room;
 
-socket.emit("join-room",{ room, username });
+
 
 const messages = document.getElementById("messages");
 const messageInput = document.getElementById("messageInput");
 const typingBox = document.getElementById("typingBox");
+
 let typingTimeout;
 
 // Hiển thị tin nhắn
@@ -72,33 +71,28 @@ messageInput.addEventListener("input", () => {
 
 });
 // Gửi tin nhắn
-document.getElementById("sendBtn").onclick = ()=>{
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
 
-  const input = document.getElementById("messageInput");
-
-  const text = input.value.trim();
-
-  if(!text) return;
-
-  socket.emit("send-message",{
-    room,
-    username,
-    message:text
-  });
-
-  input.value="";
-};
-
-// Enter gửi
-document.getElementById("messageInput")
-.addEventListener("keydown",(e)=>{
-
-  if(e.key==="Enter"){
-    document.getElementById("sendBtn").click();
-  }
-
+messageInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        sendMessage();
+    }
 });
 
+function sendMessage() {
+
+    const text = messageInput.value.trim();
+
+    if (!text) return;
+
+    socket.emit("send-message", {
+        room,
+        username,
+        message: text
+    });
+
+    messageInput.value = "";
+}
 // Nhận tin nhắn
 socket.on("new-message",(data)=>{
   addMessage(data);

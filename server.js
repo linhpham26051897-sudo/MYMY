@@ -65,19 +65,21 @@ app.post("/create-room",(req,res)=>{
 
     const room = {
 
-        id:Date.now(),
+    id: Date.now(),
 
-        roomCode,
+    roomCode,
 
-        roomName,
+    roomName,
 
-        owner,
+    owner: owner,
 
-        members:[owner],
+    ownerName: owner,
 
-        createdAt:new Date()
+    members: [owner],
 
-    };
+    createdAt: new Date().toISOString()
+
+};
 
     rooms.push(room);
 

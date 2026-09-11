@@ -69,6 +69,8 @@ function renderRooms(){
 
                     <p>Mã: ${room.roomCode}</p>
 
+                    <p>👤 Tạo bởi: ${room.ownerName}</p>
+
                     <p>${room.members.length} thành viên</p>
 
                 </div>
@@ -289,4 +291,31 @@ window.joinCall = async(roomCode)=>{
     location.href=
 `call.html?room=${roomCode}&username=${currentUser.username}`;
 
+};
+document.getElementById("joinRoomBtn").onclick = async () => {
+
+    const code = prompt("Nhập mã phòng (VD: MYB167)");
+
+    if (!code) return;
+
+    const res = await fetch("/join-room-api", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            roomCode: code.toUpperCase(),
+            username: currentUser.username
+        })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        alert(data.message);
+        return;
+    }
+
+    location.href =
+        `chat.html?room=${data.roomName}&username=${currentUser.username}`;
 };
