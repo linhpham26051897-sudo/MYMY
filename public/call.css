@@ -1,0 +1,328 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Poppins,sans-serif;
+}
+
+body{
+    background:#000;
+    overflow:hidden;
+}
+
+/* ===== TRANG GỌI ===== */
+
+.call-page{
+    width:100%;
+    height:100vh;
+    position:relative;
+    background:#000;
+}
+
+/* ===== VIDEO NGƯỜI KIA ===== */
+
+.remote-video-container{
+    position:absolute;
+    inset:0;
+    background:#111827;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+.remote-video-container video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.waiting-text{
+    color:white;
+    font-size:22px;
+    text-align:center;
+    opacity:.8;
+}
+
+/* ===== CAMERA CỦA MÌNH ===== */
+
+.local-video{
+    position:absolute;
+    bottom:110px;
+    right:20px;
+    width:170px;
+    height:230px;
+    border-radius:20px;
+    border:3px solid white;
+    object-fit:cover;
+    background:black;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+/* ===== HEADER ===== */
+
+.call-header{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:white;
+    background:linear-gradient(to bottom,
+        rgba(0,0,0,.55),
+        transparent);
+}
+
+.call-info h2{
+    font-size:20px;
+}
+
+.call-info p{
+    color:#D1D5DB;
+    font-size:14px;
+}
+
+.header-btn{
+    width:48px;
+    height:48px;
+    border:none;
+    border-radius:50%;
+    cursor:pointer;
+    background:rgba(255,255,255,.2);
+    color:white;
+    font-size:22px;
+    backdrop-filter:blur(8px);
+}
+
+/* ===== ĐỒNG HỒ ===== */
+
+.timer{
+    position:absolute;
+    top:90px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:8px 18px;
+    border-radius:20px;
+    background:rgba(255,255,255,.15);
+    color:white;
+    font-size:15px;
+    backdrop-filter:blur(10px);
+}
+
+/* ===== NÚT ĐIỀU KHIỂN ===== */
+
+.controls{
+    position:absolute;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%);
+
+    display:flex;
+    gap:18px;
+
+    padding:14px 22px;
+
+    border-radius:40px;
+
+    background:rgba(20,20,20,.35);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.45);
+
+    border:1px solid rgba(255,255,255,.08);
+}
+
+/* Nút chung */
+
+.control-btn{
+
+    width:64px;
+    height:64px;
+
+    border:none;
+    border-radius:50%;
+
+    cursor:pointer;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:28px;
+
+    color:white;
+
+    background:linear-gradient(
+        145deg,
+        rgba(255,255,255,.18),
+        rgba(255,255,255,.08)
+    );
+
+    backdrop-filter:blur(10px);
+
+    transition:.25s ease;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.15),
+        0 6px 18px rgba(0,0,0,.3);
+
+}
+
+.control-btn:hover{
+
+    transform:translateY(-3px) scale(1.08);
+
+    background:linear-gradient(
+        145deg,
+        rgba(255,255,255,.28),
+        rgba(255,255,255,.12)
+    );
+
+}
+
+.control-btn:active{
+    transform:scale(.95);
+}
+
+/* Mic */
+
+#micBtn{
+    background:linear-gradient(145deg,#14B8A6,#0F766E);
+}
+
+/* Camera */
+
+#cameraBtn{
+    background:linear-gradient(145deg,#3B82F6,#1D4ED8);
+}
+
+/* Đổi camera */
+
+#switchCameraBtn{
+    background:linear-gradient(145deg,#F59E0B,#D97706);
+}
+
+/* Loa */
+
+#speakerBtn{
+    background:linear-gradient(145deg,#8B5CF6,#6D28D9);
+}
+
+/* Cúp máy */
+
+.end-call{
+
+    background:linear-gradient(145deg,#EF4444,#B91C1C);
+
+    box-shadow:
+        0 8px 22px rgba(239,68,68,.45);
+
+}
+
+.end-call:hover{
+    box-shadow:
+        0 10px 26px rgba(239,68,68,.65);
+}
+
+/* Khi nút bị tắt */
+
+.control-btn.off{
+    background:#374151 !important;
+    color:#D1D5DB;
+}
+/* Video người bên kia */
+
+.remote-video-area{
+    position:fixed;
+    inset:0;
+    background:black;
+}
+
+#remoteVideo{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    background:black;
+}
+
+/* Video của mình */
+
+.local-video-box{
+    position:fixed;
+    right:20px;
+    bottom:110px;
+    width:220px;
+    height:140px;
+    border-radius:20px;
+    overflow:hidden;
+    border:3px solid white;
+    box-shadow:0 8px 25px rgba(0,0,0,.3);
+    z-index:20;
+}
+
+#localVideo{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* Thanh điều khiển */
+
+.call-controls{
+    position:fixed;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:18px;
+    z-index:30;
+}
+
+.control-btn{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    border:none;
+    cursor:pointer;
+    font-size:26px;
+    background:white;
+}
+
+.hangup{
+    background:#EF4444;
+    color:white;
+}
+/* ===== MOBILE ===== */
+
+@media(max-width:768px){
+
+.local-video{
+    width:120px;
+    height:170px;
+    bottom:105px;
+}
+
+.controls{
+    gap:12px;
+}
+
+.control-btn{
+    width:56px;
+    height:56px;
+    font-size:22px;
+}
+
+.call-header{
+    padding:15px;
+}
+
+.timer{
+    top:80px;
+}
+
+}

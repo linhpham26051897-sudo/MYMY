@@ -1,97 +1,180 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MYMY - Trang chủ</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYMY Messenger</title>
 
-  <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="app">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
 
-    <div class="logo">
-      💜 MYMY
-    </div>
+        <div class="profile">
 
-    <div class="profile-card">
+            <div class="avatar" id="userAvatar">M</div>
 
-      <div class="avatar" id="avatarLetter">
-        N
-      </div>
+            <div class="profile-info">
+                <h3 id="usernameText">Đang tải...</h3>
+                <p id="emailText">...</p>
+            </div>
 
-      <h3 id="fullName">
-        Nguyen Van Linh
-      </h3>
-
-      <p id="emailUser">
-        linh@gmail.com
-      </p>
-
-      <span class="status">
-        🟢 Đang hoạt động
-      </span>
-
-    </div>
-
-    <button id="logoutBtn" class="logout">
-       Đăng xuất
-    </button>
-
-    <div class="online-box">
-
-      <h4>👥 Thành viên Online</h4>
-
-      <div id="memberList">
-
-        <div class="member">
-          <span class="dot"></span>
-          Bạn
         </div>
 
-      </div>
+        <button id="logoutBtn" class="logout-btn">
+            🚪 Đăng xuất
+        </button>
+
+        <div class="search-box">
+            <input
+                type="text"
+                id="searchRoom"
+                placeholder="🔍 Tìm phòng hoặc mã phòng..."
+            >
+        </div>
+
+        <div class="sidebar-buttons">
+
+            <button id="createRoomBtn" class="purple-btn">
+                ➕ Tạo phòng
+            </button>
+
+            <button id="joinRoomBtn" class="green-btn">
+                🚪 Tham gia phòng
+            </button>
+
+        </div>
+
+        <div class="sidebar-title">
+            💬 Danh sách phòng
+        </div>
+
+        <div id="chatList" class="chat-list">
+
+            <!-- script.js render phòng -->
+
+        </div>
+
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <main class="main-content">
+
+        <section class="welcome-card">
+
+            <div class="logo-circle">💜</div>
+
+            <h1>MYMY Messenger</h1>
+
+            <p>
+                Chat • Gọi thoại • Video Call giữa điện thoại và máy tính.
+            </p>
+
+            <div class="welcome-buttons">
+
+                <button id="welcomeCreateRoom" class="purple-btn">
+                    ➕ Tạo phòng mới
+                </button>
+
+                <button id="welcomeJoinRoom" class="outline-btn">
+                    🚪 Tham gia phòng
+                </button>
+
+            </div>
+
+        </section>
+
+        <section class="room-section">
+
+            <div class="section-header">
+
+                <h2>💬 Phòng của bạn</h2>
+
+                <span id="roomCount">0 phòng</span>
+
+            </div>
+
+            <div id="roomContainer" class="room-container">
+
+                <!-- script.js render card phòng -->
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ================= POPUP TẠO PHÒNG ================= -->
+
+<div id="createRoomModal" class="modal hidden">
+
+    <div class="modal-box">
+
+        <h2>➕ Tạo phòng mới</h2>
+
+        <input
+            id="newRoomName"
+            type="text"
+            placeholder="Nhập tên phòng..."
+        >
+
+        <div class="modal-buttons">
+
+            <button id="cancelCreateRoom" class="outline-btn">
+                Hủy
+            </button>
+
+            <button id="confirmCreateRoom" class="purple-btn">
+                Tạo phòng
+            </button>
+
+        </div>
 
     </div>
 
-  </aside>
+</div>
 
-  <!-- MAIN -->
-  <main class="main">
+<!-- ================= POPUP THAM GIA PHÒNG ================= -->
 
-    <div class="header">
+<div id="joinRoomModal" class="modal hidden">
 
-    <input
-        id="searchRoom"
-        placeholder="🔍 Tìm tên hoặc mã phòng..."
-    >
+    <div class="modal-box">
 
-    <button id="joinRoomBtn">
-         Tham gia
-    </button>
+        <h2>🚪 Tham gia phòng</h2>
 
-    <button id="createRoomBtn">
-         Tạo phòng
-    </button>
+        <input
+            id="joinRoomCode"
+            type="text"
+            placeholder="Nhập mã phòng..."
+        >
+
+        <div class="modal-buttons">
+
+            <button id="cancelJoinRoom" class="outline-btn">
+                Hủy
+            </button>
+
+            <button id="confirmJoinRoom" class="green-btn">
+                Tham gia
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
-    <h2 class="title">
-      Cuộc trò chuyện
-    </h2>
-
-    <div id="chatList" class="room-list"></div>
-
-  </main>
-
-</div>
+<!-- ================= SCRIPT ================= -->
 
 <script src="/socket.io/socket.io.js"></script>
-
+<script src="auth.js"></script>
 <script src="script.js"></script>
 
 </body>

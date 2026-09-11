@@ -1,150 +1,223 @@
-const socket = io();
+// ======================================================
+// MYMY CALL.JS V5 - LIVEKIT
+// ======================================================
 
-const params = new URLSearchParams(location.search);
+import {
+    Room,
+    RoomEvent,
+    createLocalVideoTrack
+} from "https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.esm.mjs";
 
-const room = params.get("room");
+const params = new URLSearchParams(window.location.search);
+
+const roomName = params.get("room");
 const username = params.get("username");
+const callType = params.get("type") || "video";
 
-document.getElementById("roomName").innerHTML = room;
+if (!roomName || !username) {
+    location.href = "index.html";
+}
 
-const LIVEKIT_URL =
-"https://YOUR_PROJECT.livekit.cloud";
+// ================= HTML =================
 
-let lkRoom;
+const roomTitle = document.getElementById("roomTitle");
+const callStatus = document.getElementById("callStatus");
+const waitingText = document.getElementById("waitingText");
 
+const localVideo = document.getElementById("localVideo");
+const remoteVideo = document.getElementById("remoteVideo");
 
+const micBtn = document.getElementById("micBtn");
+const cameraBtn = document.getElementById("cameraBtn");
+const switchCameraBtn = document.getElementById("switchCameraBtn");
+const speakerBtn = document.getElementById("speakerBtn");
+const hangupBtn = document.getElementById("hangupBtn");
+const backBtn = document.getElementById("backBtn");
 
+const timer = document.getElementById("callTimer");
 
+roomTitle.textContent = roomName;
 
+// ================= LIVEKIT =================
 
-let localVideoTrack;
-let localAudioTrack;
+const room = new Room();
 
-async function startCall(){
+let micEnabled = true;
+let cameraEnabled = callType === "video";
+let seconds = 0;
+let interval;
 
-const res = await fetch(
-`/token?room=${room}&username=${username}`
-);
+// ================= TIMER =================
 
-const data = await res.json();
+function startTimer() {
 
-lkRoom = new LivekitClient.Room();
+    clearInterval(interval);
 
-await lkRoom.connect(
-LIVEKIT_URL,
-data.token
-);
+    interval = setInterval(() => {
 
-// Xin quyền Camera + Mic
+        seconds++;
 
-await lkRoom.localParticipant.setCameraEnabled(true);
+        const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const ss = String(seconds % 60).padStart(2, "0");
 
-await lkRoom.localParticipant.setMicrophoneEnabled(true);
+        timer.textContent = `${mm}:${ss}`;
 
-// Lấy camera của mình
+    }, 1000);
 
-const stream =
-await navigator.mediaDevices.getUserMedia({
-video:true,
-audio:true
+}
+
+// ================= CONNECT =================
+
+async function connectRoom() {
+
+    callStatus.textContent = "📞 Đang kết nối...";
+
+    const res = await fetch(
+        `/livekit-token?room=${roomName}&username=${username}`
+    );
+
+    const { token, url } = await res.json();
+
+    await room.connect(url, token);
+
+    callStatus.textContent = "🟢 Đã kết nối";
+    waitingText.style.display = "none";
+
+    startTimer();
+
+    // Micro
+    await room.localParticipant.setMicrophoneEnabled(true);
+
+    // Camera
+    if (callType === "video") {
+
+        await room.localParticipant.setCameraEnabled(true);
+
+        const videoTrack = await createLocalVideoTrack();
+
+        videoTrack.attach(localVideo);
+
+    } else {
+
+        localVideo.style.display = "none";
+        cameraBtn.style.display = "none";
+        switchCameraBtn.style.display = "none";
+
+    }
+
+}
+
+connectRoom();
+
+// ================= NHẬN VIDEO NGƯỜI KHÁC =================
+
+room.on(RoomEvent.TrackSubscribed, (track) => {
+
+    if (track.kind === "video") {
+
+        track.attach(remoteVideo);
+
+        remoteVideo.style.display = "block";
+
+    }
+
+    if (track.kind === "audio") {
+
+        track.attach();
+
+    }
+
 });
 
-document.getElementById("localVideo").srcObject =
-stream;
+// ================= NGƯỜI THAM GIA =================
 
-document.getElementById("callStatus").innerHTML =
-"🟢 Đã kết nối";
+room.on(RoomEvent.ParticipantConnected, (participant) => {
 
-subscribeRemote();
-
-startTimer();
-
-}
-
-
-
-startCall();
-function subscribeRemote(){
-
-lkRoom.on(
-"trackSubscribed",
-(track)=>{
-
-if(track.kind==="video"){
-
-const video = track.attach();
-
-video.style.width="100%";
-video.style.height="100%";
-video.style.objectFit="cover";
-
-document.getElementById("remoteVideo").appendChild(video);
-
-}
-
-if(track.kind==="audio"){
-
-const audio = track.attach();
-
-document.body.appendChild(audio);
-
-audio.play();
-
-}
+    callStatus.textContent =
+        `🟢 Đang gọi với ${participant.identity}`;
 
 });
 
-}
-let mic=true;
+room.on(RoomEvent.ParticipantDisconnected, () => {
 
-micBtn.onclick=async()=>{
+    callStatus.textContent = "📴 Người kia đã rời cuộc gọi.";
 
-mic=!mic;
+    waitingText.style.display = "flex";
 
-await lkRoom.localParticipant.setMicrophoneEnabled(mic);
-
-micBtn.innerHTML=mic?"🎤":"🔇";
-
-};
-let camera=true;
-
-cameraBtn.onclick=async()=>{
-
-camera=!camera;
-
-await lkRoom.localParticipant.setCameraEnabled(camera);
-
-cameraBtn.innerHTML=camera?"📹":"🚫";
-
-};
-
-let facing="user";
-
-switchCameraBtn.onclick = async ()=>{
-
-facing =
-facing==="user"
-? "environment"
-: "user";
-
-const stream =
-await navigator.mediaDevices.getUserMedia({
-video:{
-facingMode:facing
-},
-audio:true
 });
 
-document.getElementById("localVideo").srcObject=stream;
+// ================= MIC =================
+
+micBtn.onclick = async () => {
+
+    micEnabled = !micEnabled;
+
+    await room.localParticipant.setMicrophoneEnabled(micEnabled);
+
+    micBtn.textContent = micEnabled ? "🎤" : "🔇";
 
 };
 
+// ================= CAMERA =================
 
-hangupBtn.onclick=async()=>{
+cameraBtn.onclick = async () => {
 
-await lkRoom.disconnect();
+    cameraEnabled = !cameraEnabled;
 
-location.href="chat.html?room="+room+"&username="+username;
+    await room.localParticipant.setCameraEnabled(cameraEnabled);
+
+    cameraBtn.textContent = cameraEnabled ? "📹" : "🚫";
 
 };
 
+// ================= LOA =================
+
+speakerBtn.onclick = () => {
+
+    remoteVideo.muted = !remoteVideo.muted;
+
+    speakerBtn.textContent =
+        remoteVideo.muted ? "🔈" : "🔊";
+
+};
+
+// ================= ĐỔI CAMERA =================
+
+switchCameraBtn.onclick = async () => {
+
+    try {
+
+        await room.localParticipant.setCameraEnabled(false);
+        await room.localParticipant.setCameraEnabled(true);
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+};
+
+// ================= CÚP MÁY =================
+
+async function leaveCall() {
+
+    clearInterval(interval);
+
+    await room.disconnect();
+
+    location.href =
+        `chat.html?room=${roomName}&username=${username}`;
+
+}
+
+hangupBtn.onclick = leaveCall;
+backBtn.onclick = leaveCall;
+
+// ================= THOÁT TAB =================
+
+window.addEventListener("beforeunload", async () => {
+
+    await room.disconnect();
+
+});

@@ -1,32 +1,116 @@
+// ======================================================
+// MYMY CHAT.JS V4 - PHẦN 1
+// ======================================================
+
 const socket = io();
+
+// ================= USER =================
 
 const params = new URLSearchParams(location.search);
 
 const room = params.get("room");
-
-
 const username = params.get("username");
 
-// Hiển thị tên phòng
-document.getElementById("roomName").textContent = room;
+if (!room || !username) {
+    alert("Không tìm thấy phòng.");
+    location.href = "index.html";
+}
 
+// ================= HTML =================
 
+const roomName = document.getElementById("roomName");
+const roomStatus = document.getElementById("roomStatus");
 
 const messages = document.getElementById("messages");
+const memberList = document.getElementById("memberList");
+
 const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
 const typingBox = document.getElementById("typingBox");
 
-let typingTimeout;
+const voiceCallBtn = document.getElementById("voiceCallBtn");
+const videoCallBtn = document.getElementById("videoCallBtn");
+const backBtn = document.getElementById("backBtn");
 
-// Hiển thị tin nhắn
-function addMessage(data){
+roomName.textContent = room;
 
-    const row = document.createElement("div");
+// ================= THAM GIA PHÒNG =================
+
+socket.emit("join-room", {
+    room,
+    username
+});
+
+// ================= LOAD LỊCH SỬ =================
+
+async function loadMessages() {
+
+    const res = await fetch(`/messages/${room}`);
+
+    const history = await res.json();
+
+    messages.innerHTML = "";
+
+    history.forEach(renderMessage);
+
+}
+
+loadMessages();
+typingBox.textContent = "";
+typingBox.style.display = "none";
+socket.on("user-typing", (user) => {
+
+    if (user === username) return;
+
+    typingBox.style.display = "block";
+    typingBox.textContent = `${user} đang nhập...`;
+
+    clearTimeout(typingTimeout);
+
+    typingTimeout = setTimeout(() => {
+        typingBox.textContent = "";
+        typingBox.style.display = "none";
+    }, 1500);
+
+});
+// ================= RENDER TIN NHẮN =================
+
+function renderMessage(data){
 
     const mine = data.username === username;
 
-    row.className =
-        mine ? "message-row mine" : "message-row other";
+    const row = document.createElement("div");
+    row.className = mine ? "message-row mine" : "message-row other";
+
+    let content = "";
+
+    // Tin nhắn ảnh
+    if (data.type === "image") {
+
+        content = `
+            <img src="${data.message}" class="chat-image">
+        `;
+
+    }
+    // Tin nhắn file
+    else if (data.type === "file") {
+
+        content = `
+            <a class="chat-file"
+               href="${data.message}"
+               target="_blank">
+                📄 ${data.fileName}
+            </a>
+        `;
+
+    }
+    // Tin nhắn văn bản
+    else {
+
+        content = escapeHTML(data.message);
+
+    }
 
     row.innerHTML = `
         ${mine ? "" : `
@@ -36,32 +120,77 @@ function addMessage(data){
 
         <div class="message-content">
 
-            <div class="sender">
-                ${mine ? "Bạn" : data.username}
+            <div class="sender">${data.username}</div>
+
+            <div class="message-bubble">
+                ${content}
             </div>
 
-            <div class="message">
-                ${data.message}
-            </div>
-
-            <div class="time">
-                ${data.time}
-            </div>
+            <div class="message-time">${data.time}</div>
 
         </div>
-
-        ${mine ? `
-        <div class="message-avatar">
-            ${username.charAt(0).toUpperCase()}
-        </div>` : ""}
     `;
 
     messages.appendChild(row);
-
     messages.scrollTop = messages.scrollHeight;
+}
+
+// ================= CHỐNG HTML =================
+
+function escapeHTML(text) {
+
+    return text
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;");
 
 }
-// Gửi trạng thái đang nhập
+
+// ================= GỬI TIN =================
+
+sendBtn.onclick = sendMessage;
+
+messageInput.addEventListener("keydown", e => {
+
+    if (e.key === "Enter") {
+
+        e.preventDefault();
+
+        sendMessage();
+
+    }
+
+});
+
+function sendMessage() {
+
+    const message = messageInput.value.trim();
+
+    if (message === "") return;
+
+    socket.emit("send-message", {
+    room,
+    username,
+    type: "text",
+    message
+});
+
+    messageInput.value = "";
+
+}
+
+// ================= NHẬN TIN =================
+
+socket.on("new-message", data => {
+
+    renderMessage(data);
+
+});
+
+// ================= ĐANG NHẬP =================
+
+let typingTimeout;
+
 messageInput.addEventListener("input", () => {
 
     socket.emit("typing", {
@@ -70,133 +199,261 @@ messageInput.addEventListener("input", () => {
     });
 
 });
-// Gửi tin nhắn
-document.getElementById("sendBtn").addEventListener("click", sendMessage);
 
-messageInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        sendMessage();
-    }
-});
+socket.on("user-typing", user => {
 
-function sendMessage() {
+    if (user === username) return;
 
-    const text = messageInput.value.trim();
-
-    if (!text) return;
-
-    socket.emit("send-message", {
-        room,
-        username,
-        message: text
-    });
-
-    messageInput.value = "";
-}
-// Nhận tin nhắn
-socket.on("new-message",(data)=>{
-  addMessage(data);
-});
-
-// Emoji nhanh
-const emojis = ["😊","😂","😍","❤️","👍","🎉","😎","😭"];
-
-document.getElementById("emojiBtn").onclick = () => {
-
-    const emoji =
-        emojis[Math.floor(Math.random() * emojis.length)];
-
-    messageInput.value += emoji;
-
-    messageInput.focus();
-
-};
-
-// Quay lại Trang chủ
-document.getElementById("backBtn").onclick=()=>{
-  location.href="index.html";
-};
-
-// Sang màn hình gọi
-document.getElementById("callBtn").onclick = () => {
-
-    socket.emit("call-user", {
-        room,
-        username
-    });
-
-    location.href =
-    `call.html?room=${encodeURIComponent(room)}&username=${username}`;
-
-};
-// ================= NHẬN CUỘC GỌI =================
-
-socket.on("incoming-call", (data) => {
-
-    const accept =
-    confirm(`📞 ${data.username} đang gọi cho bạn`);
-
-    if (accept) {
-
-        socket.emit("accept-call", {
-            room: data.room,
-            username
-        });
-
-        location.href =
-        `call.html?room=${encodeURIComponent(data.room)}&username=${username}`;
-
-    } else {
-
-        socket.emit("reject-call", {
-            room: data.room,
-            username
-        });
-
-    }
-
-});
-socket.on("user-typing", (user) => {
-
-    typingBox.innerHTML = `${user} đang nhập...`;
+    typingBox.textContent =
+        `${user} đang nhập...`;
 
     clearTimeout(typingTimeout);
 
     typingTimeout = setTimeout(() => {
-        typingBox.innerHTML = "";
+
+        typingBox.textContent = "";
+
     }, 1500);
 
 });
-const ringtone = new Audio(
-"/ringtone.mp3"
-);
+// ======================================================
+// MYMY CHAT.JS V4 - PHẦN 2
+// ======================================================
 
-socket.on("incoming-call",(data)=>{
+// ================= DANH SÁCH ONLINE =================
 
-ringtone.play();
+socket.on("room-users", (users) => {
 
-const accept =
-confirm(`${data.username} đang gọi video.`);
+    memberList.innerHTML = "";
 
-ringtone.pause();
+    roomStatus.textContent = `🟢 ${users.length} thành viên online`;
 
-if(accept){
+    users.forEach((user) => {
 
-socket.emit("accept-call",{
-room:data.room,
-username
+        const member = document.createElement("div");
+
+        member.className = "member-item";
+
+        member.innerHTML = `
+            <div class="member-avatar">
+                ${user.charAt(0).toUpperCase()}
+            </div>
+
+            <span>${user}</span>
+        `;
+
+        memberList.appendChild(member);
+
+    });
+
 });
 
-location.href=
-`call.html?room=${data.room}&username=${username}`;
+// ================= HEADER BUTTON =================
 
-}else{
+// Quay lại trang chủ
+backBtn.onclick = () => {
 
-socket.emit("reject-call",{
-room:data.room,
-username
-});
+    window.location.href = "index.html";
+
+};
+
+// Gọi thoại
+voiceCallBtn.onclick = () => {
+
+    window.location.href =
+        `call.html?room=${room}&username=${username}&type=voice`;
+
+};
+
+// Video Call
+videoCallBtn.onclick = () => {
+
+    window.location.href =
+        `call.html?room=${room}&username=${username}&type=video`;
+
+};
+
+// ================= EMOJI PICKER =================
+
+const emojis = ["😀","😂","😍","🥰","😭","😎","👍","❤️","🔥","🎉"];
+
+const emojiBtn = document.getElementById("emojiBtn");
+
+if (emojiBtn) {
+
+    emojiBtn.onclick = () => {
+
+        const picker = document.createElement("div");
+
+        picker.className = "emoji-picker";
+
+        emojis.forEach((emoji) => {
+
+            const item = document.createElement("span");
+
+            item.textContent = emoji;
+
+            item.onclick = () => {
+
+                messageInput.value += emoji;
+
+                picker.remove();
+
+                messageInput.focus();
+
+            };
+
+            picker.appendChild(item);
+
+        });
+
+        document.body.appendChild(picker);
+
+        const rect = emojiBtn.getBoundingClientRect();
+
+        picker.style.left = rect.left + "px";
+        picker.style.top = rect.top - 70 + "px";
+
+        document.addEventListener(
+            "click",
+            () => picker.remove(),
+            { once: true }
+        );
+
+    };
 
 }
+
+// ================= GỬI ẢNH / FILE =================
+
+const imageInput = document.getElementById("imageInput");
+
+if (imageInput) {
+
+    imageInput.addEventListener("change", async () => {
+
+        const file = imageInput.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+
+            const res = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await res.json();
+
+            socket.emit("send-message", {
+                room,
+                username,
+                type: result.fileType.startsWith("image/")
+                    ? "image"
+                    : "file",
+                message: result.url,
+                fileName: result.fileName
+            });
+
+            imageInput.value = "";
+
+        } catch (err) {
+
+            console.error(err);
+            alert("Upload thất bại.");
+
+        }
+
+    });
+
+}
+
+// ================= KÉO XUỐNG CUỐI =================
+
+const observer = new MutationObserver(() => {
+
+    messages.scrollTop = messages.scrollHeight;
+
+});
+
+observer.observe(messages, {
+    childList: true
+});
+
+// ================= NHẬN CUỘC GỌI =================
+
+socket.on("incoming-call", (data) => {
+
+    if (data.username === username) return;
+
+    const text =
+        data.type === "voice"
+            ? `📞 ${data.username} đang gọi thoại cho bạn.`
+            : `📹 ${data.username} đang gọi video cho bạn.`;
+
+    const accept = confirm(text);
+
+    if (accept) {
+
+        socket.emit("accept-call", {
+            room,
+            username
+        });
+
+        window.location.href =
+            `call.html?room=${room}&username=${username}&type=${data.type}`;
+
+    } else {
+
+        socket.emit("reject-call", {
+            room,
+            username
+        });
+
+    }
+
+});
+
+// ================= KẾT THÚC CUỘC GỌI =================
+
+socket.on("call-ended", ({ username: other }) => {
+
+    alert(`📞 ${other} đã kết thúc cuộc gọi.`);
+
+});
+
+// ================= REACTION (👍 ❤️ 😂 😮 😢) =================
+
+messages.addEventListener("dblclick", (e) => {
+
+    const bubble = e.target.closest(".message-bubble");
+
+    if (!bubble) return;
+
+    const reaction = document.createElement("div");
+
+    reaction.className = "reaction-bar";
+
+    ["👍","❤️","😂","😮","😢"].forEach((icon) => {
+
+        const span = document.createElement("span");
+
+        span.textContent = icon;
+
+        span.onclick = () => {
+
+            bubble.innerHTML += ` <span class="reaction">${icon}</span>`;
+
+            reaction.remove();
+
+        };
+
+        reaction.appendChild(span);
+
+    });
+
+    bubble.appendChild(reaction);
 
 });

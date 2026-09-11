@@ -1,271 +1,543 @@
-const fs = require("fs");
-const path = require("path");
+// ======================================================
+// MYMY SERVER V4 - PHẦN 1
+// ======================================================
+require("dotenv").config();
 
-const USERS_FILE = path.join(__dirname, "database", "users.json");
-const ROOMS_FILE = path.join(__dirname, "database", "rooms.json");
-const MESSAGES_FILE = path.join(__dirname, "database", "messages.json");
-
-function readJSON(file) {
-    return JSON.parse(fs.readFileSync(file, "utf8"));
-}
-
-function writeJSON(file, data) {
-    fs.writeFileSync(file, JSON.stringify(data, null, 2));
-}
+const { AccessToken } = require("livekit-server-sdk");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const { AccessToken } = require("livekit-server-sdk");
-const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY;
-const LIVEKIT_API_SECRET = process.env.LIVEKIT_API_SECRET;
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
+
 const app = express();
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
+const io = new Server(server,{
+    cors:{
+        origin:"*"
+    }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
+
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+
 app.use(express.static("public"));
-app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/public/login.html");
+app.use("/uploads",express.static("uploads"));
+// ================= DATABASE =================
+
+const DB_FOLDER = "./database";
+
+const USERS_FILE = `${DB_FOLDER}/users.json`;
+const ROOMS_FILE = `${DB_FOLDER}/rooms.json`;
+const MESSAGES_FILE = `${DB_FOLDER}/messages.json`;
+
+if (!fs.existsSync(DB_FOLDER)){
+    fs.mkdirSync(DB_FOLDER);
+}
+
+[USERS_FILE,ROOMS_FILE,MESSAGES_FILE].forEach(file=>{
+
+    if(!fs.existsSync(file)){
+        fs.writeFileSync(file,"{}");
+    }
+
 });
 
-/* ================== PHÒNG CHAT ================== */
+function readJSON(file){
 
-const rooms = {};
-function generateRoomCode(){
-
-    return (
-        "MY" +
-        Math.random()
-            .toString(36)
-            .substring(2,6)
-            .toUpperCase()
-    );
+    return JSON.parse(fs.readFileSync(file,"utf8"));
 
 }
+
+function writeJSON(file,data){
+
+    fs.writeFileSync(file,JSON.stringify(data,null,2));
+
+}
+// ================= SAVE MESSAGE =================
+
+function saveMessage(room,message){
+
+    const data = readJSON(MESSAGES_FILE);
+
+    if(!data[room]){
+        data[room]=[];
+    }
+
+    data[room].push(message);
+
+    writeJSON(MESSAGES_FILE,data);
+
+}
+// ======================================================
+// LỊCH SỬ CHAT
+// ======================================================
+
+app.get("/messages/:room",(req,res)=>{
+
+    const data = readJSON(MESSAGES_FILE);
+
+    res.json(data[req.params.room] || []);
+
+});
+// ======================================================
+// UPLOAD FILE
+// ======================================================
+
+if(!fs.existsSync("./uploads")){
+    fs.mkdirSync("./uploads");
+}
+
+const storage = multer.diskStorage({
+
+    destination(req,file,cb){
+        cb(null,"uploads");
+    },
+
+    filename(req,file,cb){
+
+        const ext = path.extname(file.originalname);
+
+        cb(null,uuidv4()+ext);
+
+    }
+
+});
+
+const upload = multer({
+
+    storage,
+
+    limits:{
+        fileSize:20*1024*1024
+    }
+
+});
+
+app.post("/upload",upload.single("file"),(req,res)=>{
+
+    if(!req.file){
+        return res.status(400).json({
+            success:false
+        });
+    }
+
+    res.json({
+
+        success:true,
+
+        fileName:req.file.originalname,
+
+        fileType:req.file.mimetype,
+
+        url:`/uploads/${req.file.filename}`
+
+    });
+
+});
+// ======================================================
+// PHÒNG CHAT
+// ======================================================
+
 app.post("/create-room",(req,res)=>{
 
+    const {room,name}=req.body;
+
     const rooms = readJSON(ROOMS_FILE);
+
+    rooms[room]={
+
+        room,
+        name,
+        createdAt:Date.now()
+
+    };
+
+    writeJSON(ROOMS_FILE,rooms);
+
+    res.json({
+        success:true
+    });
+
+});
+
+app.get("/rooms",(req,res)=>{
+
+    res.json(readJSON(ROOMS_FILE));
+
+});
+// ======================================================
+// QUẢN LÝ NGƯỜI ONLINE
+// ======================================================
+
+const onlineRooms = {};
+// ======================================================
+// SOCKET.IO
+// ======================================================
+
+io.on("connection", (socket) => {
+
+    console.log("🟢 Connected:", socket.id);
+
+    // ================= JOIN ROOM =================
+
+    socket.on("join-room", ({ room, username }) => {
+
+        socket.join(room);
+
+        socket.room = room;
+        socket.username = username;
+
+        if (!onlineRooms[room]) {
+            onlineRooms[room] = [];
+        }
+
+        // Không thêm trùng người
+        if (!onlineRooms[room].includes(username)) {
+            onlineRooms[room].push(username);
+        }
+
+        // Gửi danh sách online cho cả phòng
+        io.to(room).emit("room-users", onlineRooms[room]);
+
+        console.log(`${username} joined ${room}`);
+
+    });
+
+    // ================= GỬI TIN NHẮN =================
+
+    socket.on("send-message", (data) => {
+
+        const message = {
+
+            username: data.username,
+            message: data.message,
+            type: data.type || "text",
+            fileName: data.fileName || "",
+
+            time: new Date().toLocaleTimeString("vi-VN", {
+                hour: "2-digit",
+                minute: "2-digit"
+            })
+
+        };
+
+        // Lưu lịch sử
+        saveMessage(data.room, message);
+
+        // Gửi realtime
+        io.to(data.room).emit("new-message", message);
+
+    });
+
+    // ================= ĐANG NHẬP =================
+
+    socket.on("typing", ({ room, username }) => {
+
+        socket.to(room).emit("user-typing", username);
+
+    });
+
+    // ================= GỌI THOẠI / VIDEO =================
+
+    socket.on("start-call", ({ room, username, type }) => {
+
+        socket.to(room).emit("incoming-call", {
+            username,
+            type
+        });
+
+    });
+
+    socket.on("accept-call", ({ room, username }) => {
+
+        socket.to(room).emit("call-accepted", {
+            username
+        });
+
+    });
+
+    socket.on("reject-call", ({ room, username }) => {
+
+        socket.to(room).emit("call-rejected", {
+            username
+        });
+
+    });
+
+    socket.on("end-call", ({ room, username }) => {
+
+        socket.to(room).emit("call-ended", {
+            username
+        });
+
+    });
+
+    // ================= THOÁT PHÒNG =================
+
+    socket.on("disconnect", () => {
+
+        const room = socket.room;
+        const username = socket.username;
+
+        if (room && onlineRooms[room]) {
+
+            onlineRooms[room] =
+                onlineRooms[room].filter(user => user !== username);
+
+            io.to(room).emit("room-users", onlineRooms[room]);
+
+            if (onlineRooms[room].length === 0) {
+                delete onlineRooms[room];
+            }
+
+        }
+
+        console.log(`🔴 ${username} disconnected`);
+
+    });
+
+});
+// ======================================================
+// ĐĂNG KÝ
+// ======================================================
+
+app.post("/register", (req, res) => {
+
+    const { name, username, email, password } = req.body;
+
+    const users = readJSON(USERS_FILE);
+
+    // Kiểm tra trùng username
+    const existed = Object.values(users).find(
+        user => user.username === username
+    );
+
+    if (existed) {
+        return res.status(400).json({
+            message: "Tên đăng nhập đã tồn tại."
+        });
+    }
+
+    const id = uuidv4();
+
+    users[id] = {
+        id,
+        name,
+        username,
+        email,
+        password,
+        createdAt: Date.now()
+    };
+
+    writeJSON(USERS_FILE, users);
+
+    res.json({
+        success: true,
+        message: "Đăng ký thành công."
+    });
+
+});
+// ======================================================
+// ĐĂNG NHẬP
+// ======================================================
+
+app.post("/login", (req, res) => {
+
+    const { username, password } = req.body;
+
+    const users = readJSON(USERS_FILE);
+
+    const user = Object.values(users).find(
+        u => u.username === username && u.password === password
+    );
+
+    if (!user) {
+        return res.status(401).json({
+            message: "Sai tài khoản hoặc mật khẩu."
+        });
+    }
+
+    res.json({
+        success: true,
+        user: {
+            id: user.id,
+            name: user.name,
+            username: user.username,
+            email: user.email
+        }
+    });
+
+});
+// ======================================================
+// DANH SÁCH USER
+// ======================================================
+
+app.get("/users", (req, res) => {
+
+    const users = readJSON(USERS_FILE);
+
+    res.json(Object.values(users));
+
+});
+// ======================================================
+// TẠO PHÒNG
+// ======================================================
+
+app.post("/create-room", (req, res) => {
 
     const { roomName, owner } = req.body;
 
-    if(!roomName){
-        return res.status(400).json({
-            message:"Thiếu tên phòng."
-        });
-    }
+    const rooms = readJSON(ROOMS_FILE);
 
-    const roomCode = generateRoomCode();
+    const roomCode =
+        "MY" + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-    const room = {
+    rooms[roomCode] = {
+        roomCode,
+        roomName,
+        ownerName: owner,
+        members: [owner],
+        createdAt: Date.now()
+    };
 
-    id: Date.now(),
+    writeJSON(ROOMS_FILE, rooms);
 
-    roomCode,
+    // Cập nhật realtime
+    io.emit("room-updated");
 
-    roomName,
-
-    owner: owner,
-
-    ownerName: owner,
-
-    members: [owner],
-
-    createdAt: new Date().toISOString()
-
-};
-
-    rooms.push(room);
-
-    writeJSON(ROOMS_FILE,rooms);
-
-    res.json(room);
+    res.json(rooms[roomCode]);
 
 });
-app.get("/rooms",(req,res)=>{
+// ======================================================
+// LẤY DANH SÁCH PHÒNG
+// ======================================================
+
+app.get("/rooms", (req, res) => {
 
     const rooms = readJSON(ROOMS_FILE);
 
-    res.json(rooms);
+    res.json(Object.values(rooms));
 
 });
-app.get("/search-room",(req,res)=>{
+// ======================================================
+// THAM GIA PHÒNG
+// ======================================================
 
-    const keyword =
-        req.query.keyword.toLowerCase();
-
-    const rooms = readJSON(ROOMS_FILE);
-
-    const result = rooms.filter(room=>
-
-        room.roomName.toLowerCase().includes(keyword) ||
-
-        room.roomCode.toLowerCase().includes(keyword)
-
-    );
-
-    res.json(result);
-
-});
-app.post("/join-room-api",(req,res)=>{
-
-    const rooms = readJSON(ROOMS_FILE);
+app.post("/join-room-api", (req, res) => {
 
     const { roomCode, username } = req.body;
 
-    const room = rooms.find(r=>r.roomCode===roomCode);
+    const rooms = readJSON(ROOMS_FILE);
 
-    if(!room){
-
+    if (!rooms[roomCode]) {
         return res.status(404).json({
-            message:"Không tìm thấy phòng."
+            message: "Không tìm thấy phòng."
         });
-
     }
 
-    if(!room.members.includes(username)){
-
-        room.members.push(username);
-
+    if (!rooms[roomCode].members.includes(username)) {
+        rooms[roomCode].members.push(username);
     }
 
-    writeJSON(ROOMS_FILE,rooms);
+    writeJSON(ROOMS_FILE, rooms);
 
-    res.json(room);
+    io.emit("room-updated");
+
+    res.json(rooms[roomCode]);
 
 });
-io.on("connection", (socket) => {
-  console.log("🟢 Có người kết nối:", socket.id);
+// ======================================================
+// XÓA PHÒNG
+// ======================================================
 
-  socket.on("join-room", ({ room, username }) => {
-    socket.join(room);
+app.delete("/delete-room/:roomCode", (req, res) => {
 
-    socket.room = room;
-    socket.username = username;
+    const rooms = readJSON(ROOMS_FILE);
 
-    if (!rooms[room]) rooms[room] = [];
+    const roomCode = req.params.roomCode;
 
-    if (!rooms[room].includes(username)) {
-      rooms[room].push(username);
+    if (!rooms[roomCode]) {
+        return res.status(404).json({
+            message: "Không tìm thấy phòng."
+        });
     }
 
-    io.to(room).emit("room-users", rooms[room]);
-    socket.to(room).emit("user-joined", username);
+    delete rooms[roomCode];
 
-    console.log(`${username} vào phòng ${room}`);
-  });
-  socket.on("leave-room", ({ room, username }) => {
-    socket.leave(room);
+    writeJSON(ROOMS_FILE, rooms);
 
-    io.to(room).emit("user-left", username);
-});
-  socket.on("send-message", ({ room, username, message }) => {
+    io.emit("room-updated");
 
-    io.to(room).emit("new-message", {
-        username,
-        message,
-        time: new Date().toLocaleTimeString("vi-VN", {
-            hour: "2-digit",
-            minute: "2-digit"
-        })
+    res.json({
+        success: true
     });
 
 });
-socket.on("typing", ({ room, username }) => {
+// ======================================================
+// LIVEKIT TOKEN API
+// ======================================================
 
-    socket.to(room).emit("user-typing", username);
-
-});
-// ================= GỌI ĐIỆN =================
-
-socket.on("call-user", ({ room, username }) => {
-
-    socket.to(room).emit("incoming-call", {
-        room,
-        username
-    });
-
-});
-
-// Người nhận đồng ý
-socket.on("accept-call", ({ room, username }) => {
-
-    io.to(room).emit("call-accepted", {
-        username
-    });
-
-});
-
-// Người nhận từ chối
-socket.on("reject-call", ({ room, username }) => {
-
-    socket.to(room).emit("call-rejected", {
-        username
-    });
-
-});
-
-  socket.on("disconnect", () => {
-    const room = socket.room;
-
-    if (room && rooms[room]) {
-      rooms[room] = rooms[room].filter(
-        (u) => u !== socket.username
-      );
-
-      io.to(room).emit("room-users", rooms[room]);
-      socket.to(room).emit("user-left", socket.username);
-
-      if (rooms[room].length === 0) {
-        delete rooms[room];
-      }
-    }
-  });
-});
-
-/* ================== LIVEKIT TOKEN ================== */
-
-app.get("/token", async (req, res) => {
+app.get("/livekit-token", async (req, res) => {
 
     const room = req.query.room;
     const username = req.query.username;
 
     if (!room || !username) {
-        return res.status(400).send("Thiếu room hoặc username");
+        return res.status(400).json({
+            message: "Thiếu room hoặc username."
+        });
     }
 
-    const token = new AccessToken(
-        LIVEKIT_API_KEY,
-        LIVEKIT_API_SECRET,
-        {
-            identity: username
-        }
-    );
+    try {
 
-    token.addGrant({
-        roomJoin: true,
-        room: room,
-        canPublish: true,
-        canSubscribe: true
-    });
+        const token = new AccessToken(
+            process.env.LIVEKIT_API_KEY,
+            process.env.LIVEKIT_API_SECRET,
+            {
+                identity: username,
+                name: username
+            }
+        );
 
-    const jwt = await token.toJwt();
+        token.addGrant({
+            roomJoin: true,
+            room,
+            canPublish: true,
+            canSubscribe: true
+        });
 
-    res.json({
-        token: jwt
-    });
+        const jwt = await token.toJwt();
 
+        res.json({
+            token: jwt,
+            url: process.env.LIVEKIT_URL
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            message: "Không tạo được LiveKit token."
+        });
+
+    }
 
 });
+// ======================================================
+// START SERVER
+// ======================================================
 
-/* ================== START ================== */
+server.listen(PORT, () => {
 
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`💜 MYMY chạy tại cổng ${PORT}`);
+    console.log(`🚀 MYMY Server running on port ${PORT}`);
+
 });

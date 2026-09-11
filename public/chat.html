@@ -1,62 +1,96 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MYMY Chat</title>
 
-  <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="chat.css"/>
 </head>
 
 <body>
 
 <div class="chat-app">
 
-  <!-- Header -->
+  <!-- HEADER -->
   <header class="chat-header">
 
-    <button id="backBtn">⬅</button>
+    <button id="backBtn" class="icon-btn">
+      ⬅
+    </button>
 
-    <div class="user">
+    <div class="room-center">
 
-      <div class="avatar" id="roomAvatar">💜</div>
+      <div class="room-avatar">💜</div>
 
-      <div>
+      <div class="room-text">
         <h3 id="roomName">Đang tải...</h3>
-        <p>🟢 Đang hoạt động</p>
+        <p id="roomStatus">🟢 Đang hoạt động</p>
       </div>
 
     </div>
 
-   <button id="callBtn" class="call-button">
-    📞
-</button>
+    <div class="header-actions">
+
+      <button id="voiceCallBtn"
+              class="icon-btn"
+              title="Gọi thoại">
+        📞
+      </button>
+
+      <button id="videoCallBtn"
+              class="icon-btn"
+              title="Video Call">
+        📹
+      </button>
+
+    </div>
 
   </header>
 
- <!-- ================= KHU VỰC TIN NHẮN ================= -->
-<main class="messages-wrapper">
+  <!-- DANH SÁCH THÀNH VIÊN -->
+  <section class="members-bar">
 
-    <!-- Hiển thị "đang nhập..." -->
+    <div class="members-title">
+      👥 Thành viên Online
+    </div>
+
+    <div id="memberList" class="member-list"></div>
+
+  </section>
+
+  <!-- KHUNG CHAT -->
+  <main class="messages-wrapper">
+
     <div id="typingBox" class="typing-box"></div>
 
-    <!-- Danh sách tin nhắn -->
     <div id="messages" class="messages"></div>
 
-</main>
+  </main>
 
-<!-- ================= THANH NHẬP TIN NHẮN ================= -->
+  <!-- GỬI TIN -->
+ <!-- GỬI TIN -->
 <footer class="send-bar">
 
-    <button id="emojiBtn">😊</button>
+    <div id="typingBox" class="typing-box"></div>
 
-    <input
-        id="messageInput"
-        type="text"
-        placeholder="Nhập tin nhắn..."
-    >
+    <div class="chat-input">
 
-    <button id="sendBtn">➤</button>
+        <button id="emojiBtn" class="icon-btn">😊</button>
+
+        <label for="imageInput" class="icon-btn">📎</label>
+        <input id="imageInput" type="file" hidden accept="image/*,.pdf,.doc,.docx">
+
+        <input
+            id="messageInput"
+            type="text"
+            placeholder="Nhập tin nhắn..."
+            autocomplete="off"
+        >
+
+        <button id="sendBtn" class="send-btn">➤</button>
+
+    </div>
 
 </footer>
 

@@ -1,87 +1,309 @@
-// ===================== ĐĂNG KÝ =====================
+// ======================================================
+// MYMY AUTH.JS V2 (PHẦN 1/2)
+// ======================================================
 
-const registerBtn = document.getElementById("registerBtn");
+// ===== ELEMENT =====
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
 
-if (registerBtn) {
+// ======================================================
+// KIỂM TRA ĐÃ ĐĂNG NHẬP CHƯA
+// ======================================================
 
-    registerBtn.onclick = () => {
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-        const fullname = document.getElementById("fullname").value.trim();
-        const username = document.getElementById("username").value.trim();
-        const email = document.getElementById("email").value.trim().toLowerCase();
-        const password = document.getElementById("password").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
+if (
+    currentUser &&
+    location.pathname.includes("login.html")
+) {
+    location.href = "index.html";
+}
 
-        if (!fullname || !username || !email || !password || !confirmPassword) {
-            alert("⚠️ Vui lòng nhập đầy đủ thông tin.");
+// ======================================================
+// ĐĂNG NHẬP
+// ======================================================
+
+if (loginForm) {
+
+    loginForm.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const username =
+            document.getElementById("loginUsername").value.trim();
+
+        const password =
+            document.getElementById("loginPassword").value.trim();
+
+        if (!username || !password) {
+            alert("Vui lòng nhập đầy đủ.");
+            return;
+        }
+
+        try {
+
+            const res = await fetch("/login", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message);
+                return;
+            }
+
+            localStorage.setItem(
+                "currentUser",
+                JSON.stringify(data.user)
+            );
+
+            alert(`Xin chào ${data.user.username}!`);
+
+            location.href = "index.html";
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert("Không kết nối được Server.");
+
+        }
+
+    });
+
+}
+
+// ======================================================
+// ĐĂNG KÝ
+// ======================================================
+
+if (registerForm) {
+
+    registerForm.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const name =
+            document.getElementById("registerName").value.trim();
+
+        const username =
+            document.getElementById("registerUsername").value.trim();
+
+        const email =
+            document.getElementById("registerEmail").value.trim();
+
+        const password =
+            document.getElementById("registerPassword").value;
+
+        const confirmPassword =
+            document.getElementById("registerConfirmPassword").value;
+
+        if (!name || !username || !email || !password) {
+            alert("Vui lòng nhập đầy đủ thông tin.");
             return;
         }
 
         if (password.length < 6) {
-            alert("⚠️ Mật khẩu phải có ít nhất 6 ký tự.");
+            alert("Mật khẩu tối thiểu 6 ký tự.");
             return;
         }
 
         if (password !== confirmPassword) {
-            alert("❌ Hai mật khẩu không khớp.");
+            alert("Mật khẩu xác nhận không khớp.");
             return;
         }
 
-        const users = JSON.parse(localStorage.getItem("mymyUsers")) || [];
+        try {
 
-        const existed = users.find(user => user.email === email);
+            const res = await fetch("/register", {
 
-        if (existed) {
-            alert("📧 Email này đã được đăng ký.");
-            return;
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    name,
+                    username,
+                    email,
+                    password
+                })
+
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message);
+                return;
+            }
+
+            alert("Đăng ký thành công!");
+
+            location.href = "login.html";
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert("Không kết nối được Server.");
+
         }
 
-        const newUser = {
-            id: Date.now(),
-            fullname,
-            username,
-            email,
-            password,
-            avatar: fullname.charAt(0).toUpperCase()
-        };
+    });
 
-        users.push(newUser);
+}
+// ======================================================
+// MYMY AUTH.JS V2 (PHẦN 2/2)
+// ======================================================
 
-        localStorage.setItem("mymyUsers", JSON.stringify(users));
+// ================= LẤY USER ĐANG ĐĂNG NHẬP =================
+function getCurrentUser() {
+    return JSON.parse(localStorage.getItem("currentUser"));
+}
 
-        alert("🎉 Đăng ký thành công!");
+// ================= KIỂM TRA ĐĂNG NHẬP =================
+function requireLogin() {
 
-        window.location.href = "login.html";
-    };
+    const user = getCurrentUser();
+
+    if (!user) {
+        alert("Vui lòng đăng nhập trước.");
+        location.href = "login.html";
+        return null;
+    }
+
+    return user;
+}
+
+// ================= ĐĂNG XUẤT =================
+function logout() {
+
+    if (confirm("🚪 Bạn có muốn đăng xuất không?")) {
+
+        localStorage.removeItem("currentUser");
+
+        location.href = "login.html";
+
+    }
 
 }
 
-// ===================== ĐĂNG NHẬP =====================
+// Gắn nút logout nếu có trên trang
+const logoutBtn = document.getElementById("logoutBtn");
 
-const loginBtn = document.getElementById("loginBtn");
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
+}
 
-if (loginBtn) {
+// ================= HIỂN THỊ THÔNG TIN USER =================
+function loadProfile() {
 
-    loginBtn.onclick = () => {
+    const user = requireLogin();
+    if (!user) return;
 
-        const email = document.getElementById("email").value.trim().toLowerCase();
-        const password = document.getElementById("password").value;
+    const usernameText = document.getElementById("usernameText");
+    const emailText = document.getElementById("emailText");
+    const avatar = document.getElementById("userAvatar");
 
-        const users = JSON.parse(localStorage.getItem("mymyUsers")) || [];
+    if (usernameText) usernameText.textContent = user.username;
+    if (emailText) emailText.textContent = user.email;
 
-        const user = users.find(u =>
-            u.email === email &&
-            u.password === password
+    if (avatar) {
+        avatar.textContent = user.username.charAt(0).toUpperCase();
+    }
+
+}
+
+// Tự động hiển thị profile nếu đang ở index.html
+if (location.pathname.includes("index.html")) {
+    loadProfile();
+}
+
+// ================= CẬP NHẬT THÔNG TIN =================
+async function refreshUser() {
+
+    const user = getCurrentUser();
+    if (!user) return;
+
+    try {
+
+        const res = await fetch("/users");
+
+        if (!res.ok) return;
+
+        const users = await res.json();
+
+        const latest = users.find(
+            u => u.username === user.username
         );
 
-        if (!user) {
-            alert("❌ Sai email hoặc mật khẩu.");
-            return;
+        if (latest) {
+
+            localStorage.setItem(
+                "currentUser",
+                JSON.stringify(latest)
+            );
+
         }
 
-        localStorage.setItem("currentUser", JSON.stringify(user));
+    } catch (err) {
 
-        window.location.href = "index.html";
-    };
+        console.log("Không cập nhật được user.");
+
+    }
 
 }
+
+// ================= CHUYỂN TRANG =================
+function goChat(roomCode) {
+
+    const user = requireLogin();
+
+    if (!user) return;
+
+    location.href =
+        `chat.html?room=${roomCode}&username=${user.username}`;
+
+}
+
+function goCall(roomCode, type = "video") {
+
+    const user = requireLogin();
+
+    if (!user) return;
+
+    location.href =
+        `call.html?room=${roomCode}&username=${user.username}&type=${type}`;
+
+}
+
+// ================= KIỂM TRA PHIÊN =================
+window.addEventListener("load", () => {
+
+    const protectedPages = [
+        "index.html",
+        "chat.html",
+        "call.html"
+    ];
+
+    const currentPage = location.pathname.split("/").pop();
+
+    if (protectedPages.includes(currentPage)) {
+        requireLogin();
+    }
+
+});

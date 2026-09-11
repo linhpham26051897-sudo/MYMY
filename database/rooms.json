@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "id": 1789136111352,
+    "roomName": "nhatlinh",
+    "roomCode": "MYV4C4",
+    "owner": "linh123",
+    "ownerName": "linh123",
+    "members": [
+      "linh123",
+      "nhatlinh"
+    ],
+    "createdAt": "2026-09-11T14:15:11.352Z"
+  },
+  {
+    "id": 1789142137932,
+    "roomCode": "MY0KSR",
+    "roomName": "linh",
+    "ownerName": "nhatlinh",
+    "members": [
+      "nhatlinh"
+    ],
+    "createdAt": "2026-09-11T15:55:37.932Z"
+  }
+]

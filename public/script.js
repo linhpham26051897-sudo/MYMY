@@ -1,321 +1,389 @@
-const socket = io();
+// ======================================================
+// MYMY SCRIPT.JS V3 - PHẦN 1/2
+// ======================================================
 
-// ================= USER =================
+const user = JSON.parse(localStorage.getItem("currentUser"));
 
-const currentUser =
-JSON.parse(localStorage.getItem("currentUser"));
-
-if(!currentUser){
-
-    window.location.href="login.html";
-
+if (!user) {
+    location.href = "login.html";
 }
 
-document.getElementById("fullName").innerHTML =
-currentUser.fullname;
+// ================= ELEMENT =================
 
-document.getElementById("emailUser").innerHTML =
-currentUser.email;
+const roomContainer = document.getElementById("roomContainer");
+const roomCount = document.getElementById("roomCount");
+const searchRoom = document.getElementById("searchRoom");
 
-document.getElementById("avatarLetter").innerHTML =
-currentUser.fullname.charAt(0).toUpperCase();
+const createRoomBtn = document.getElementById("createRoomBtn");
+const welcomeCreateRoom = document.getElementById("welcomeCreateRoom");
 
-// ================= PHÒNG CHAT =================
+const joinRoomBtn = document.getElementById("joinRoomBtn");
+const welcomeJoinRoom = document.getElementById("welcomeJoinRoom");
+
+const createModal = document.getElementById("createRoomModal");
+const joinModal = document.getElementById("joinRoomModal");
+
+const confirmCreateRoom = document.getElementById("confirmCreateRoom");
+const cancelCreateRoom = document.getElementById("cancelCreateRoom");
+
+const confirmJoinRoom = document.getElementById("confirmJoinRoom");
+const cancelJoinRoom = document.getElementById("cancelJoinRoom");
+
+const newRoomName = document.getElementById("newRoomName");
+const joinRoomCode = document.getElementById("joinRoomCode");
+
+// ================= DỮ LIỆU =================
 
 let rooms = [];
 
-async function loadRooms(){
+// ======================================================
+// LOAD PHÒNG
+// ======================================================
 
-    const res = await fetch("/rooms");
+async function loadRooms() {
 
-    rooms = await res.json();
+    try {
 
-    renderRooms();
+        const res = await fetch("/rooms");
+
+        rooms = await res.json();
+
+        renderRooms(rooms);
+
+    } catch (err) {
+
+        console.log(err);
+
+    }
 
 }
 
 loadRooms();
 
-const chatList =
-document.getElementById("chatList");
+// ======================================================
+// RENDER PHÒNG
+// ======================================================
 
-function renderRooms(){
+function renderRooms(list) {
 
-    chatList.innerHTML = "";
+    roomContainer.innerHTML = "";
 
-    if(rooms.length===0){
+    roomCount.textContent = `${list.length} phòng`;
 
-        chatList.innerHTML = `
-            <h3>Chưa có phòng nào.</h3>
+    if (list.length === 0) {
+
+        roomContainer.innerHTML = `
+            <div class="empty-room">
+                😥 Chưa có phòng nào.
+            </div>
         `;
+
         return;
+
     }
 
-    rooms.forEach(room=>{
+    list.forEach(room => {
 
-        chatList.innerHTML += `
+        const card = document.createElement("div");
 
-        <div class="room-card">
+        card.className = "room-card";
 
-            <div class="room-left">
+        card.innerHTML = `
+
+            <div class="room-top">
 
                 <div class="room-avatar">
-                    💜
+                    ${room.roomName.charAt(0).toUpperCase()}
                 </div>
 
                 <div class="room-info">
 
                     <h3>${room.roomName}</h3>
 
-                    <p>Mã: ${room.roomCode}</p>
+                    <p>👑 ${room.ownerName}</p>
 
-                    <p>👤 Tạo bởi: ${room.ownerName}</p>
-
-                    <p>${room.members.length} thành viên</p>
+                    <p>🆔 ${room.roomCode}</p>
 
                 </div>
 
             </div>
 
-            <div class="actions">
+            <div class="room-members">
+                👥 ${room.members.length} thành viên
+            </div>
 
-                <button
-                class="chat-btn"
-                onclick="joinChat('${room.roomCode}')">
-                    💬
+            <div class="room-actions">
+
+                <button class="chat-btn"
+                    onclick="goChatRoom('${room.roomCode}')">
+                    💬 Chat
                 </button>
 
-                <button
-                class="call-btn"
-                onclick="joinCall('${room.roomCode}')">
-                    📹
+                <button class="voice-btn"
+                    onclick="goVoiceCall('${room.roomCode}')">
+                    📞 Gọi
+                </button>
+
+                <button class="video-btn"
+                    onclick="goVideoCall('${room.roomCode}')">
+                    📹 Video
                 </button>
 
             </div>
 
-        </div>
-
         `;
+
+        roomContainer.appendChild(card);
 
     });
 
 }
 
-renderRooms();
+// ======================================================
+// TÌM PHÒNG
+// ======================================================
 
-// ================= TÌM PHÒNG =================
+searchRoom.addEventListener("input", () => {
 
-document.getElementById("searchRoom")
-.addEventListener("input", async(e)=>{
+    const keyword =
+        searchRoom.value.trim().toLowerCase();
 
-    const keyword = e.target.value;
+    const result = rooms.filter(room =>
 
-    if(keyword===""){
-        loadRooms();
-        return;
-    }
+        room.roomName.toLowerCase().includes(keyword) ||
+        room.roomCode.toLowerCase().includes(keyword) ||
+        room.ownerName.toLowerCase().includes(keyword)
 
-    const res = await fetch(
-        `/search-room?keyword=${keyword}`
     );
 
-    rooms = await res.json();
-
-    renderRooms();
+    renderRooms(result);
 
 });
+
+// ======================================================
+// POPUP
+// ======================================================
+
+function openCreateModal() {
+
+    createModal.classList.remove("hidden");
+
+    newRoomName.focus();
+
+}
+
+function closeCreateModal() {
+
+    createModal.classList.add("hidden");
+
+    newRoomName.value = "";
+
+}
+
+function openJoinModal() {
+
+    joinModal.classList.remove("hidden");
+
+    joinRoomCode.focus();
+
+}
+
+function closeJoinModal() {
+
+    joinModal.classList.add("hidden");
+
+    joinRoomCode.value = "";
+
+}
+
+createRoomBtn.onclick = openCreateModal;
+welcomeCreateRoom.onclick = openCreateModal;
+
+joinRoomBtn.onclick = openJoinModal;
+welcomeJoinRoom.onclick = openJoinModal;
+
+cancelCreateRoom.onclick = closeCreateModal;
+cancelJoinRoom.onclick = closeJoinModal;
+// ======================================================
+// MYMY SCRIPT.JS V3 - PHẦN 2/2
+// ======================================================
 
 // ================= TẠO PHÒNG =================
 
-document.getElementById("createRoomBtn").onclick = async()=>{
+confirmCreateRoom.onclick = async () => {
 
-    const roomName = prompt("Tên phòng:");
+    const roomName = newRoomName.value.trim();
 
-    if(!roomName) return;
-
-    const res = await fetch("/create-room",{
-
-        method:"POST",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-            roomName,
-            owner:currentUser.username
-
-        })
-
-    });
-
-    const room = await res.json();
-
-    alert(
-`🎉 Tạo thành công
-
-Tên: ${room.roomName}
-
-Mã phòng: ${room.roomCode}`
-    );
-
-    loadRooms();
-
-};
-
-// ================= CHAT =================
-
-window.openChat=(room)=>{
-
-    window.location.href=
-    `chat.html?room=${encodeURIComponent(room)}&username=${currentUser.username}`;
-
-};
-
-// ================= GỌI =================
-
-window.openCall = (room) => {
-
-    socket.emit("call-user", {
-        room,
-        username: currentUser.username
-    });
-
-    window.location.href =
-        `call.html?room=${encodeURIComponent(room)}&username=${currentUser.username}`;
-
-};
-
-// ================= LOGOUT =================
-
-document.getElementById("logoutBtn").onclick=()=>{
-
-    localStorage.removeItem("currentUser");
-
-    window.location.href="login.html";
-
-};
-
-// ================= ONLINE =================
-
-socket.on("room-users",(users)=>{
-
-    const member =
-    document.getElementById("memberList");
-
-    member.innerHTML="";
-
-    users.forEach(user=>{
-
-        member.innerHTML += `
-        <div class="member">
-            <span class="dot"></span>
-            ${user}
-        </div>
-        `;
-
-    });
-
-});
-socket.on("incoming-call", (data) => {
-
-    const ok = confirm(`📞 ${data.username} đang gọi cho bạn`);
-
-    if (ok) {
-
-        socket.emit("accept-call", {
-            room: data.room,
-            username: currentUser.username
-        });
-
-        window.location.href =
-            `call.html?room=${encodeURIComponent(data.room)}&username=${currentUser.username}`;
-
-    } else {
-
-        socket.emit("reject-call", {
-            room: data.room,
-            username: currentUser.username
-        });
-
-    }
-
-});
-// ================= JOIN CHAT =================
-window.joinChat = async(roomCode)=>{
-
-    const res = await fetch("/join-room-api",{
-
-        method:"POST",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-            roomCode,
-
-            username:currentUser.username
-
-        })
-
-    });
-
-    const room = await res.json();
-
-    location.href =
-`chat.html?room=${room.roomCode}&username=${currentUser.username}`;
-
-};
-window.joinCall = async(roomCode)=>{
-
-    await fetch("/join-room-api",{
-
-        method:"POST",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-            roomCode,
-            username:currentUser.username
-
-        })
-
-    });
-
-    location.href=
-`call.html?room=${roomCode}&username=${currentUser.username}`;
-
-};
-document.getElementById("joinRoomBtn").onclick = async () => {
-
-    const code = prompt("Nhập mã phòng (VD: MYB167)");
-
-    if (!code) return;
-
-    const res = await fetch("/join-room-api", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            roomCode: code.toUpperCase(),
-            username: currentUser.username
-        })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-        alert(data.message);
+    if (roomName === "") {
+        alert("Nhập tên phòng.");
         return;
     }
 
+    try {
+
+        const res = await fetch("/create-room", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                roomName,
+                owner: user.username
+            })
+        });
+
+        const room = await res.json();
+
+        closeCreateModal();
+
+        await loadRooms();
+
+        alert(`✅ Đã tạo phòng "${room.roomName}"\nMã phòng: ${room.roomCode}`);
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Không tạo được phòng.");
+
+    }
+
+};
+
+// Enter để tạo phòng
+newRoomName.addEventListener("keydown", (e) => {
+
+    if (e.key === "Enter") {
+        confirmCreateRoom.click();
+    }
+
+});
+
+// ================= THAM GIA PHÒNG =================
+
+confirmJoinRoom.onclick = async () => {
+
+    const roomCode = joinRoomCode.value.trim().toUpperCase();
+
+    if (!roomCode) {
+        alert("Nhập mã phòng.");
+        return;
+    }
+
+    try {
+
+        const res = await fetch("/join-room-api", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                roomCode,
+                username: user.username
+            })
+        });
+
+        const room = await res.json();
+
+        if (!res.ok) {
+            alert(room.message);
+            return;
+        }
+
+        closeJoinModal();
+
+        await loadRooms();
+
+        alert(`🎉 Đã tham gia phòng ${room.roomName}`);
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Không tham gia được phòng.");
+
+    }
+
+};
+
+// Enter để tham gia
+joinRoomCode.addEventListener("keydown", (e) => {
+
+    if (e.key === "Enter") {
+        confirmJoinRoom.click();
+    }
+
+});
+
+// ================= ĐÓNG POPUP KHI CLICK RA NGOÀI =================
+
+window.addEventListener("click", (e) => {
+
+    if (e.target === createModal) closeCreateModal();
+
+    if (e.target === joinModal) closeJoinModal();
+
+});
+
+// ================= CHUYỂN TRANG =================
+
+window.goChatRoom = function(roomCode){
+
     location.href =
-        `chat.html?room=${data.roomName}&username=${currentUser.username}`;
+        `chat.html?room=${roomCode}&username=${user.username}`;
+
+};
+
+window.goVoiceCall = function(roomCode){
+
+    location.href =
+        `call.html?room=${roomCode}&username=${user.username}&type=voice`;
+
+};
+
+window.goVideoCall = function(roomCode){
+
+    location.href =
+        `call.html?room=${roomCode}&username=${user.username}&type=video`;
+
+};
+
+// ================= AUTO REFRESH DANH SÁCH PHÒNG =================
+
+// Cứ 5 giây cập nhật một lần.
+setInterval(loadRooms, 5000);
+
+// ================= SOCKET UPDATE REALTIME =================
+
+const socket = io();
+
+socket.emit("join-room", {
+    room: "LOBBY",
+    username: user.username
+});
+
+socket.on("room-updated", () => {
+    loadRooms();
+});
+
+// ================= HIỂN THỊ USER =================
+
+document.getElementById("usernameText").textContent = user.username;
+document.getElementById("emailText").textContent = user.email || "";
+
+const avatar = document.getElementById("userAvatar");
+
+avatar.textContent =
+    user.username.charAt(0).toUpperCase();
+
+// ================= ĐĂNG XUẤT =================
+
+document.getElementById("logoutBtn").onclick = () => {
+
+    if (confirm("Bạn muốn đăng xuất?")) {
+
+        localStorage.removeItem("currentUser");
+
+        location.href = "login.html";
+
+    }
+
 };

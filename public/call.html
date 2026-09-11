@@ -1,78 +1,87 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MYMY Video Call</title>
+  <title>MYMY Call</title>
 
-<link rel="stylesheet" href="call.css">
-
+  <link rel="stylesheet" href="call.css">
 </head>
-
 <body>
 
 <div class="call-page">
 
-    <!-- Video người kia -->
-    <div id="remoteVideo" class="remote-video"></div>
+  <!-- VIDEO NGƯỜI KIA -->
+  <div id="remoteVideoContainer" class="remote-video-container">
 
-    <!-- Camera mình -->
-    <video
-        id="localVideo"
-        autoplay
-        playsinline
-        muted
-        class="local-video">
-    </video>
+    <div class="waiting-text" id="waitingText">
+      📡 Đang chờ người kia tham gia...
+    </div>
 
-    <!-- Header -->
-    <div class="call-header">
+  </div>
 
-        <button id="backBtn">⬅</button>
+  <!-- CAMERA CỦA MÌNH -->
+  <video
+    id="localVideo"
+    autoplay
+    muted
+    playsinline
+    class="local-video">
+  </video>
 
-        <div>
+  <!-- HEADER -->
+  <header class="call-header">
 
-            <h2 id="roomName"></h2>
+    <button id="backBtn" class="header-btn">⬅</button>
 
-            <p id="callStatus">
-                📡 Đang kết nối...
-            </p>
+    <div class="call-info">
 
-        </div>
+      <h2 id="roomTitle">MYMY</h2>
+
+      <p id="callStatus">Đang kết nối...</p>
 
     </div>
 
-    <!-- Đồng hồ -->
-    <div id="timer" class="timer">
-        00:00
-    </div>
+  </header>
 
-    <!-- Thanh điều khiển -->
-    <div class="controls">
+  <!-- ĐỒNG HỒ -->
+  <div id="callTimer" class="timer">
+    00:00
+  </div>
 
-        <button id="micBtn">🎤</button>
+  <!-- THANH ĐIỀU KHIỂN -->
+  <div class="controls">
 
-        <button id="cameraBtn">📹</button>
+    <button id="micBtn" class="control-btn">
+      🎤
+    </button>
 
-        <button id="switchCameraBtn">🔄</button>
+    <button id="cameraBtn" class="control-btn">
+      📹
+    </button>
 
-        <button id="speakerBtn">🔊</button>
+    <button id="switchCameraBtn" class="control-btn">
+      🔄
+    </button>
 
-        <button id="hangupBtn" class="red">📞</button>
+    <button id="speakerBtn" class="control-btn">
+      🔊
+    </button>
 
-    </div>
+    <button id="hangupBtn" class="control-btn end-call">
+      📞
+    </button>
+
+  </div>
 
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 
-
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 
-<script src="call.js"></script>
+<script type="module" src="call.js"></script>
 
 </body>
-
 </html>
