@@ -3,6 +3,7 @@ const socket = io();
 const params = new URLSearchParams(location.search);
 
 const room = params.get("room");
+
 socket.emit("join-room",{
     room,
     username
